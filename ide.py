@@ -20,13 +20,12 @@ class App(customtkinter.CTk):
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=0)
+        # self.grid_rowconfigure(2, weight=0)
         
         # Menu
         # Frame del menu
         self.menu_frame = customtkinter.CTkFrame(self, height=40, corner_radius=0)
-        # self.menu_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
-        self.menu_frame.grid(row=0, column=0, sticky="nsew")
+        self.menu_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
         
         # Logo
         self.logo_label = customtkinter.CTkLabel(self.menu_frame, text="IDE", font=customtkinter.CTkFont(size=20, weight="bold"))
@@ -51,21 +50,29 @@ class App(customtkinter.CTk):
         self.boton_ejecutar.grid(row=0, column=4, padx=10, pady=10)
         
         # Editor de Codigo
-        self.code_textbox = customtkinter.CTkTextbox(self, wrap='none')
-        self.code_textbox.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
+        # Frame del Editor
+        self.editor_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        self.editor_frame.grid(row=1, column=0, sticky="nsew")
+        self.editor_frame.grid_rowconfigure(0, weight=1)
+        self.editor_frame.grid_columnconfigure(1, weight=1)
+        
+        self.line_textbox = customtkinter.CTkTextbox(self.editor_frame, width=50, wrap='word')
+        self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(20,20), sticky="nsew")
+        
+        self.code_textbox = customtkinter.CTkTextbox(self.editor_frame, wrap='none')
+        self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=20, sticky="nsew")
         
         
         # Outputs para analizadores, errores y ejecucion
         # Frame
         self.output_frame = customtkinter.CTkFrame(self, corner_radius=0)
-        self.output_frame.grid(row=0, column=1,rowspan=2, sticky="nsew")
-        # self.output_frame.grid(row=1, column=1, sticky="nsew")
+        self.output_frame.grid(row=1, column=1, sticky="nsew")
         self.output_frame.grid_rowconfigure((0,1), weight=1)
         self.output_frame.grid_columnconfigure(0, weight=1)
         
         # Tabview de analizadores ...
         self.analisis_tabview = customtkinter.CTkTabview(self.output_frame, width=500)
-        self.analisis_tabview.grid(row=0, column=0, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.analisis_tabview.grid(row=0, column=0, padx=(10, 20), pady=(10, 0), sticky="nsew")
         self.analisis_tabview.add("Lexico")
         self.analisis_tabview.add("Sintactico")
         self.analisis_tabview.add("Semantico")
@@ -115,7 +122,7 @@ class App(customtkinter.CTk):
         
         # Tabview Errores y ejecucion
         self.err_run_tabview = customtkinter.CTkTabview(self.output_frame, width=500)
-        self.err_run_tabview.grid(row=1, column=0, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.err_run_tabview.grid(row=1, column=0, padx=(10, 20), pady=(10, 0), sticky="nsew")
         self.err_run_tabview.add("Errores")
         self.err_run_tabview.add("Ejecucion")
         
@@ -138,7 +145,7 @@ class App(customtkinter.CTk):
         # Indicador linea y columna del cursor en archivo
         # Label line-col
         self.line_col_label = customtkinter.CTkTextbox(self.output_frame, height=20)
-        self.line_col_label.grid(row=2, column=0, padx=20, pady=(20,20), sticky="ew")
+        self.line_col_label.grid(row=2, column=0, padx=(10,20), pady=(20,20), sticky="ew")
         self.line_col_label.insert("0.0", "Ln 0, Col 0")
         self.line_col_label.configure(state="disabled")
 
