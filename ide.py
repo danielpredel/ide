@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import filedialog
-# import tkinter.messagebox
 import customtkinter as ctk
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -65,7 +64,6 @@ class App(ctk.CTk):
         self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=20, sticky="nsew")
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
-        
         
         # Outputs para analizadores, errores y ejecucion
         # Frame
@@ -150,7 +148,7 @@ class App(ctk.CTk):
         # Label line-col
         self.line_col_label = ctk.CTkTextbox(self.output_frame, height=20)
         self.line_col_label.grid(row=2, column=0, padx=(10,20), pady=(20,20), sticky="ew")
-        self.line_col_label.insert("0.0", "Ln 0, Col 0")
+        self.line_col_label.insert("0.0", "Ln 1, Col 0")
         self.line_col_label.configure(state="disabled")
 
     # Metodos
@@ -209,6 +207,7 @@ class App(ctk.CTk):
 
     def on_key_release(self, *args):
         self.enlazar_scroll()
+        self.actualizar_posicion_cursor()
 
     def enlazar_scroll(self, *args):
         primera_posicion, *_ = self.code_textbox.yview()
@@ -231,6 +230,20 @@ class App(ctk.CTk):
         
         self.line_textbox.configure(state="disabled")
 
+    def actualizar_posicion_cursor(self):
+        # Obtiene la posición del cursor
+        cursor_pos = self.code_textbox.index(ctk.INSERT)
+        
+        # Extrae la parte antes del "." para obtener el número de línea
+        linea = cursor_pos.split('.')[0]
+        col = cursor_pos.split('.')[1]
+        
+        # Actualiza la etiqueta con la información de la línea actual
+        self.line_col_label.configure(state="normal")
+        self.line_col_label.delete("0.0", "end")
+        self.line_col_label.insert("0.0", f"Ln {linea}, Col {col}")
+        self.line_col_label.configure(state="disabled")
+    
 if __name__ == "__main__":
     app = App()
     app.mainloop()
