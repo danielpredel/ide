@@ -121,7 +121,6 @@ class App(ctk.CTk):
         self.tabla_simb_tab.insert("0.0", "Tabla de Simbolos " * 20)
         self.tabla_simb_tab.configure(state="disabled")
         
-        
         # Tabview Errores y ejecucion
         self.err_run_tabview = ctk.CTkTabview(self.output_frame, width=500)
         self.err_run_tabview.grid(row=1, column=0, padx=(10, 20), pady=(10, 0), sticky="nsew")
@@ -155,7 +154,7 @@ class App(ctk.CTk):
     def operacion_archivo(self, operacion: str):
         # Abrir, cerrar, guardar, gurdar como segun operacion
         # values=["Abrir", "Cerrar", "Guardar", "Guardar como"]
-        print(operacion)
+        # print(operacion)
         if operacion == "Abrir":
             self.abrir_archivo(self)
         elif operacion == "Cerrar":
@@ -165,6 +164,8 @@ class App(ctk.CTk):
         elif operacion == "Guardar como":
             self.guardar_como_archivo(self)
         self.menu_archivo.set("Abrir")
+        self.enlazar_scroll()
+        self.actualizar_posicion_cursor()
     
     # File Operations
     def nuevo_archivo(self, *args):
@@ -193,7 +194,7 @@ class App(ctk.CTk):
             self.title(self.ruta_archivo)
             self.ruta_archivo = self.ruta_archivo
 
-    def guardar_como_archivo(self):
+    def guardar_como_archivo(self, *args):
         nueva_ruta_archivo = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if nueva_ruta_archivo:
             with open(nueva_ruta_archivo, 'w') as file:
