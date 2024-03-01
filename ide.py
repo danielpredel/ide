@@ -55,11 +55,16 @@ class App(ctk.CTk):
         self.editor_frame.grid_rowconfigure(0, weight=1)
         self.editor_frame.grid_columnconfigure(1, weight=1)
         
-        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word')
+        # Textbox para numero de linea
+        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word', activate_scrollbars=False,
+                                           state="disabled")
         self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(20,20), sticky="nsew")
         
-        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none')
+        # Textbox para editor de codigo
+        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='word', activate_scrollbars=False)
         self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=20, sticky="nsew")
+        self.code_textbox.configure(yscrollcommand=self.on_scroll)
+        self.code_textbox.bind('<KeyRelease>', self.on_key_release)
         
         
         # Outputs para analizadores, errores y ejecucion
@@ -148,7 +153,6 @@ class App(ctk.CTk):
         self.line_col_label.insert("0.0", "Ln 0, Col 0")
         self.line_col_label.configure(state="disabled")
 
-
     # Metodos
     def operacion_archivo(self, operacion: str):
         # Abrir, cerrar, guardar, gurdar como segun operacion
@@ -163,7 +167,6 @@ class App(ctk.CTk):
         elif operacion == "Guardar como":
             self.guardar_como_archivo(self)
         self.menu_archivo.set("Abrir")
-        
     
     # File Operations
     def nuevo_archivo(self, *args):
@@ -200,7 +203,33 @@ class App(ctk.CTk):
                 file.write(content)
             self.title(nueva_ruta_archivo)
             self.ruta_archivo = nueva_ruta_archivo
+    
+    def on_scroll(self, *args):
+        self.enlazar_scroll()
 
+    def on_key_release(self, *args):
+        self.enlazar_scroll()
+
+    def enlazar_scroll(self, *args):
+        primera_posicion, *_ = self.code_textbox.yview()
+        self.actualizar_lineas()
+        self.line_textbox.yview_moveto(primera_posicion)
+    
+    def actualizar_lineas(self):
+        self.line_textbox.configure(state="normal")
+        self.line_textbox.delete("0.0", "end")
+        contenido = self.code_textbox.get("1.0", tk.END)
+        
+        # Contar el número de líneas divididas por el salto de línea
+        n = len(contenido.split('\n')) - 1
+        
+        for i in range(1, n + 1):
+            if i < n:
+                self.line_textbox.insert(tk.END, f"{i}\n")
+            else:
+                self.line_textbox.insert(tk.END, f"{i}")
+        
+        self.line_textbox.configure(state="disabled")
 
 if __name__ == "__main__":
     app = App()
