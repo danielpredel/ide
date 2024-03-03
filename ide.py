@@ -1,7 +1,8 @@
-import tkinter as tk
-from tkinter import filedialog
-import customtkinter as ctk
 import os
+import tkinter as tk
+import customtkinter as ctk
+from tkinter import filedialog
+from PIL import Image
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -9,6 +10,10 @@ ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", 
 class App(ctk.CTk):
     ruta_archivo = ""
     nombre_archivo = "untitled"
+    icons = ["open_file.png","close_file.png","new_file.png","save_file.png","save_as_file.png","build.png","run.png"]
+    icons_dirname = "icons"
+    icon_images = []
+    
     # Estado del archivo:
     # 0 - nuevo
     # 1 - editado
@@ -28,30 +33,45 @@ class App(ctk.CTk):
         
         # Menu
         # Frame del menu
-        self.menu_frame = ctk.CTkFrame(self, height=40, corner_radius=0)
+        self.menu_frame = ctk.CTkFrame(self, corner_radius=0)
         self.menu_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
         
         # Logo
-        self.logo_label = ctk.CTkLabel(self.menu_frame, text="IDE", font=ctk.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=10, pady=10)
+        self.logo_label = ctk.CTkLabel(self.menu_frame, text="Super IDE", font=ctk.CTkFont(size=20, weight="bold"), height=30)
+        self.logo_label.grid(row=0, column=0, padx=(20,5), pady=10)
         
         # Nombre del archivo
-        self.archivo_label = ctk.CTkTextbox(self.menu_frame, height=20)
-        self.archivo_label.grid(row=0, column=1, padx=10, pady=10)
+        self.archivo_label = ctk.CTkTextbox(self.menu_frame, height=36)
+        self.archivo_label.grid(row=0, column=1, padx=5, pady=10)
         self.archivo_label.insert("0.0", "untitled")
         self.archivo_label.configure(state="disabled")
         
         # Selector de operaciones del archivo
-        self.menu_archivo = ctk.CTkOptionMenu(self.menu_frame, dynamic_resizing=False,
-                                                        values=["Abrir", "Cerrar", "Nuevo", "Guardar", "Guardar como"],
-                                                        command=self.operacion_archivo)
-        self.menu_archivo.grid(row=0, column=2, padx=10, pady=10)
+        self.menu_archivo = ctk.CTkOptionMenu(self.menu_frame, dynamic_resizing=False,values=["Abrir", "Cerrar", "Nuevo", "Guardar", "Guardar como"], command=self.operacion_archivo, height=36)
+        self.menu_archivo.grid(row=0, column=2, padx=5, pady=10)
+        
+        for i in range(0, len(self.icons)):
+            absolute_path = os.path.abspath(os.path.join(self.icons_dirname, self.icons[i]))
+            image = ctk.CTkImage(light_image=Image.open(absolute_path),dark_image=Image.open(absolute_path), size=(30, 30))
+            self.icon_images.append(image)
+        
+        # Botones para operaciones sobre archivos
+        self.open_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[0], width=40)
+        self.open_file_button.grid(row=0, column=3, padx=5, pady=10)
+        self.close_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[1], width=40)
+        self.close_file_button.grid(row=0, column=4, padx=5, pady=10)
+        self.new_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[2], width=40)
+        self.new_file_button.grid(row=0, column=5, padx=5, pady=10)
+        self.save_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[3], width=40)
+        self.save_file_button.grid(row=0, column=6, padx=5, pady=10)
+        self.save_as_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[4],width=40)
+        self.save_as_file_button.grid(row=0, column=7, padx=5, pady=10)
         
         # Botones compilar y ejecutar
-        self.boton_compilar = ctk.CTkButton(self.menu_frame, text='Compilar')
-        self.boton_compilar.grid(row=0, column=3, padx=10, pady=10)
-        self.boton_ejecutar = ctk.CTkButton(self.menu_frame, text='Ejecutar')
-        self.boton_ejecutar.grid(row=0, column=4, padx=10, pady=10)
+        build_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[5], width=40)
+        build_button.grid(row=0, column=8, padx=5, pady=10)
+        run_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[6], width=40)
+        run_button.grid(row=0, column=9, padx=5, pady=10)
         
         # Editor de Codigo
         # Frame del Editor
@@ -61,13 +81,12 @@ class App(ctk.CTk):
         self.editor_frame.grid_columnconfigure(1, weight=1)
         
         # Textbox para numero de linea
-        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word', activate_scrollbars=False,
-                                           state="disabled")
-        self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(20,20), sticky="nsew")
+        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word', activate_scrollbars=False,state="disabled")
+        self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(10,20), sticky="nsew")
         
         # Textbox para editor de codigo
         self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none', activate_scrollbars=False)
-        self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=20, sticky="nsew")
+        self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=(10,20), sticky="nsew")
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
         
@@ -80,7 +99,7 @@ class App(ctk.CTk):
         
         # Tabview de analizadores ...
         self.analisis_tabview = ctk.CTkTabview(self.output_frame, width=500)
-        self.analisis_tabview.grid(row=0, column=0, padx=(10, 20), pady=(10, 0), sticky="nsew")
+        self.analisis_tabview.grid(row=0, column=0, padx=(10, 20), pady=0, sticky="nsew")
         self.analisis_tabview.add("Lexico")
         self.analisis_tabview.add("Sintactico")
         self.analisis_tabview.add("Semantico")
@@ -92,7 +111,6 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("Lexico").grid_rowconfigure(0, weight=1)
         self.lexico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Lexico"), wrap='word')
         self.lexico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.lexico_tab.insert("0.0", "Analisis Lexico " * 20)
         self.lexico_tab.configure(state="disabled")
         
         # Textbox de salida para Analisis Sintactico
@@ -100,7 +118,6 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("Sintactico").grid_rowconfigure(0, weight=1)
         self.sintactico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Sintactico"), wrap='word')
         self.sintactico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.sintactico_tab.insert("0.0", "Analisis Sintactico " * 20)
         self.sintactico_tab.configure(state="disabled")
         
         # Textbox de salida para Analisis Semantico
@@ -108,7 +125,6 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("Semantico").grid_rowconfigure(0, weight=1)
         self.semantico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Semantico"), wrap='word')
         self.semantico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.semantico_tab.insert("0.0", "Analisis Semantico " * 20)
         self.semantico_tab.configure(state="disabled")
         
         # Textbox de salida para Codigo Intermedio
@@ -116,7 +132,6 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("C. Intermedio").grid_rowconfigure(0, weight=1)
         self.cod_int_tab = ctk.CTkTextbox(self.analisis_tabview.tab("C. Intermedio"), wrap='word')
         self.cod_int_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.cod_int_tab.insert("0.0", "Codigo Intermedio " * 20)
         self.cod_int_tab.configure(state="disabled")
         
         # Textbox de salida para Tabla de Simbolos
@@ -124,7 +139,6 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("T. Simbolos").grid_rowconfigure(0, weight=1)
         self.tabla_simb_tab = ctk.CTkTextbox(self.analisis_tabview.tab("T. Simbolos"), wrap='word')
         self.tabla_simb_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.tabla_simb_tab.insert("0.0", "Tabla de Simbolos " * 20)
         self.tabla_simb_tab.configure(state="disabled")
         
         # Tabview Errores y ejecucion
@@ -138,7 +152,6 @@ class App(ctk.CTk):
         self.err_run_tabview.tab("Errores").grid_rowconfigure(0, weight=1)
         self.errores_tab = ctk.CTkTextbox(self.err_run_tabview.tab("Errores"), wrap='word')
         self.errores_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.errores_tab.insert("0.0", "Errores " * 20)
         self.errores_tab.configure(state="disabled")
         
         # Textbox de salida para Tabla de Simbolos
@@ -146,7 +159,6 @@ class App(ctk.CTk):
         self.err_run_tabview.tab("Ejecucion").grid_rowconfigure(0, weight=1)
         self.ejecucion_tab = ctk.CTkTextbox(self.err_run_tabview.tab("Ejecucion"), wrap='word')
         self.ejecucion_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.ejecucion_tab.insert("0.0", "Ejecucion " * 20)
         self.ejecucion_tab.configure(state="disabled")
         
         # Indicador linea y columna del cursor en archivo
@@ -317,18 +329,12 @@ class App(ctk.CTk):
     def actualizar_archivo_label(self, *args):
         self.archivo_label.configure(state="normal")
         self.archivo_label.delete("0.0", "end")
-        # if self.estado_archivo == 0:
-        #     self.archivo_label.insert("0.0", "untitled")
-        # elif self.estado_archivo == 1:
-        #     self.archivo_label.insert("0.0", f"{self.nombre_archivo} *")
-        # elif self.estado_archivo == 2:
-        #     self.archivo_label.insert("0.0", f"{self.nombre_archivo}")
         
         if self.estado_archivo == 1:
             self.archivo_label.insert("0.0", f"{self.nombre_archivo} *")
         else:
             self.archivo_label.insert("0.0", f"{self.nombre_archivo}")
-            
+        
         self.archivo_label.configure(state="disabled")
     
     def generar_confirmacion(self, *args):
@@ -337,28 +343,23 @@ class App(ctk.CTk):
         self.ventana_advertencia.geometry("400x150")
         self.ventana_advertencia.title("Super IDE")
         # Agregar el mensaje de advertencia
-        mensaje1 = tk.Label(self.ventana_advertencia, text="¿Deseas guardar tus cambios?",
-                                    font=("Arial", 15))
+        mensaje1 = tk.Label(self.ventana_advertencia, text="¿Deseas guardar tus cambios?",font=("Arial", 15))
         mensaje1.pack()
         
-        mensaje2 = tk.Label(self.ventana_advertencia, text="Tus cambios se perderan si no los guardas",
-                                    font=("Arial", 12))
+        mensaje2 = tk.Label(self.ventana_advertencia, text="Tus cambios se perderan si no los guardas",font=("Arial", 12))
         mensaje2.pack()
         
         # Agregar el botón de aceptar
-        boton_guardar = tk.Button(self.ventana_advertencia, text="Guardar",
-                                  command=lambda: self.get_resultado_advertencia(self, "SI"))
+        boton_guardar = tk.Button(self.ventana_advertencia, text="Guardar",command=lambda: self.get_resultado_advertencia(self, "SI"))
         boton_guardar.config(borderwidth=5, relief="groove", font=("Arial", 12))
         boton_guardar.pack(side=tk.LEFT, padx=(20,0))
         
-        boton_no_guardar = tk.Button(self.ventana_advertencia, text="No guardar",
-                                  command=lambda: self.get_resultado_advertencia(self, "NO"))
+        boton_no_guardar = tk.Button(self.ventana_advertencia, text="No guardar",command=lambda: self.get_resultado_advertencia(self, "NO"))
         boton_no_guardar.config(borderwidth=5, relief="groove", font=("Arial", 12))
         boton_no_guardar.pack(side=tk.RIGHT, padx=(0,20))
 
         # Agregar el botón de cancelar
-        boton_cancelar = tk.Button(self.ventana_advertencia, text="Cancelar",
-                                  command=lambda: self.get_resultado_advertencia(self, "CANCELAR"))
+        boton_cancelar = tk.Button(self.ventana_advertencia, text="Cancelar",command=lambda: self.get_resultado_advertencia(self, "CANCELAR"))
         boton_cancelar.config(borderwidth=5, relief="groove", font=("Arial", 12))
         boton_cancelar.pack(side=tk.BOTTOM, padx=(10,10))
     
