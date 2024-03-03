@@ -218,6 +218,8 @@ class App(ctk.CTk):
         self.code_textbox.delete("1.0", tk.END)
         self.estado_archivo = 0
         self.nombre_archivo = "untitled"
+        self.ruta_archivo = ""
+        self.title(self.nombre_archivo)
         self.actualizar_archivo_label()
         self.actualizar_lineas()
         self.actualizar_posicion_cursor()
@@ -254,7 +256,7 @@ class App(ctk.CTk):
                 file.write(content)
             self.estado_archivo = 2
             self.title(self.ruta_archivo)
-            self.ruta_archivo = self.ruta_archivo
+            # self.ruta_archivo = self.ruta_archivo
             self.actualizar_archivo_label()
 
     def guardar_como_archivo(self, *args):
@@ -332,29 +334,23 @@ class App(ctk.CTk):
     
     def generar_confirmacion(self, *args):
         # Crear la ventana de advertencia
-        self.ventana_advertencia = tk.Toplevel(self)
-        self.ventana_advertencia.geometry("400x150")
+        self.ventana_advertencia = ctk.CTkToplevel(self)
         self.ventana_advertencia.title("Super IDE")
+
         # Agregar el mensaje de advertencia
-        mensaje1 = tk.Label(self.ventana_advertencia, text="¿Deseas guardar tus cambios?",font=("Arial", 15))
-        mensaje1.pack()
-        
-        mensaje2 = tk.Label(self.ventana_advertencia, text="Tus cambios se perderan si no los guardas",font=("Arial", 12))
-        mensaje2.pack()
-        
+        mensaje = ctk.CTkLabel(self.ventana_advertencia, text="¿Deseas guardar tus cambios?\nTus cambios se perderan si no los guardas",font=("Arial", 15))
+        mensaje.grid(row=0, column=0, padx=5, pady=10, columnspan=3)
+
         # Agregar el botón de aceptar
-        boton_guardar = tk.Button(self.ventana_advertencia, text="Guardar",command=lambda: self.get_resultado_advertencia(self, "SI"))
-        boton_guardar.config(borderwidth=5, relief="groove", font=("Arial", 12))
-        boton_guardar.pack(side=tk.LEFT, padx=(20,0))
-        
-        boton_no_guardar = tk.Button(self.ventana_advertencia, text="No guardar",command=lambda: self.get_resultado_advertencia(self, "NO"))
-        boton_no_guardar.config(borderwidth=5, relief="groove", font=("Arial", 12))
-        boton_no_guardar.pack(side=tk.RIGHT, padx=(0,20))
+        boton_guardar = ctk.CTkButton(self.ventana_advertencia, text="Guardar",command=lambda: self.get_resultado_advertencia(self, "SI"))
+        boton_guardar.grid(row=1, column=0, padx=5, pady=10)
 
         # Agregar el botón de cancelar
-        boton_cancelar = tk.Button(self.ventana_advertencia, text="Cancelar",command=lambda: self.get_resultado_advertencia(self, "CANCELAR"))
-        boton_cancelar.config(borderwidth=5, relief="groove", font=("Arial", 12))
-        boton_cancelar.pack(side=tk.BOTTOM, padx=(10,10))
+        boton_cancelar = ctk.CTkButton(self.ventana_advertencia, text="Cancelar",command=lambda: self.get_resultado_advertencia(self, "CANCELAR"))
+        boton_cancelar.grid(row=1, column=1, padx=5, pady=10)
+
+        boton_no_guardar = ctk.CTkButton(self.ventana_advertencia, text="No guardar",command=lambda: self.get_resultado_advertencia(self, "NO"))
+        boton_no_guardar.grid(row=1, column=2, padx=5, pady=10)
     
     def get_resultado_advertencia(self, *args):
         self.ventana_advertencia.destroy()
