@@ -56,15 +56,15 @@ class App(ctk.CTk):
             self.icon_images.append(image)
         
         # Botones para operaciones sobre archivos
-        self.open_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[0], width=40)
+        self.open_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[0], width=40, command= lambda: self.operacion_archivo(operacion="Abrir"))
         self.open_file_button.grid(row=0, column=3, padx=5, pady=10)
-        self.close_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[1], width=40)
+        self.close_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[1], width=40, command= lambda: self.operacion_archivo(operacion="Cerrar"))
         self.close_file_button.grid(row=0, column=4, padx=5, pady=10)
-        self.new_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[2], width=40)
+        self.new_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[2], width=40, command= lambda: self.operacion_archivo(operacion="Nuevo"))
         self.new_file_button.grid(row=0, column=5, padx=5, pady=10)
-        self.save_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[3], width=40)
+        self.save_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[3], width=40, command= lambda: self.operacion_archivo(operacion="Guardar"))
         self.save_file_button.grid(row=0, column=6, padx=5, pady=10)
-        self.save_as_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[4],width=40)
+        self.save_as_file_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[4],width=40, command= lambda: self.operacion_archivo(operacion="Guardar como"))
         self.save_as_file_button.grid(row=0, column=7, padx=5, pady=10)
         
         # Botones compilar y ejecutar
@@ -168,19 +168,12 @@ class App(ctk.CTk):
         self.line_col_label.insert("0.0", "Ln 1, Col 0")
         self.line_col_label.configure(state="disabled")
 
-    # Transiscion entre estados del archivo
-    #           Nuevo   Abrir   Cerrar  Guardar Guardar como
-    # Nuevo     O       O       O       O       O
-    # Editado   X       X       X       O       O
-    # Guardado  O       O       O       O       O
-    
-    # Transiscion entre estados del archivo
-    #           Nuevo   Abrir   Cerrar  Guardar     Guardar como
-    # Nuevo     OK      OK      OK      OK          OK
-    # Editado   OK      OK      OK      OK(N)       OK
-    # Guardado  O       O       O       O           O
-    # Si no hay ruta llamar automaticamente guardar como
     def operacion_archivo(self, operacion: str):
+        # Transiscion entre estados del archivo
+        #           Nuevo   Abrir   Cerrar  Guardar Guardar como
+        # Nuevo     O       O       O       O       O
+        # Editado   X       X       X       O       O
+        # Guardado  O       O       O       O       O
         matriz = [[True, True, True, False, True],
                   [False, False, False, True, False],
                   [True, True, True, True, True]]
