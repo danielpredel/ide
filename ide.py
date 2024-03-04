@@ -89,6 +89,7 @@ class App(ctk.CTk):
         self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=(10,20), sticky="nsew")
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
+        self.code_textbox.bind('<ButtonRelease-1>', self.on_key_release)
         
         # Outputs para analizadores, errores y ejecucion
         # Frame
@@ -285,6 +286,9 @@ class App(ctk.CTk):
             self.title(f"{self.ruta_archivo} *")
         self.actualizar_archivo_label()
 
+    def on_click(self, *args):
+        self.actualizar_posicion_cursor()
+        
     # Acciones a eventos
     def enlazar_scroll(self, *args):
         primera_posicion, *_ = self.code_textbox.yview()
