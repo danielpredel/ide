@@ -3,6 +3,7 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 from PIL import Image
+from lexico import analizador_lexico
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -169,6 +170,17 @@ class App(ctk.CTk):
         self.line_col_label.insert("0.0", "Ln 1, Col 0")
         self.line_col_label.configure(state="disabled")
 
+        self.lexico_tab.tag_config("PALABRA_RESERVADA", foreground="blue")
+        self.lexico_tab.tag_config("IDENTIFICADOR", foreground="green")
+        self.lexico_tab.tag_config("NUMERO", foreground="orange")
+        self.lexico_tab.tag_config("OP_ARITMETICO", foreground="red")
+        self.lexico_tab.tag_config("OP_RELACIONAL", foreground="purple")
+        self.lexico_tab.tag_config("OP_LOGICO", foreground="gray")
+        self.lexico_tab.tag_config("SIMBOLO", foreground="pink")
+        self.lexico_tab.tag_config("ASIGNACION", foreground="brown")
+        self.lexico_tab.tag_config("DECREMENTO", foreground="yellow")
+        self.lexico_tab.tag_config("INCREMENTO", foreground="cyan")
+    
     def operacion_archivo(self, operacion: str):
         # Transiscion entre estados del archivo
         #           Nuevo   Abrir   Cerrar  Guardar Guardar como
@@ -243,12 +255,115 @@ class App(ctk.CTk):
                 content = file.read()
                 self.code_textbox.delete("1.0", tk.END)
                 self.code_textbox.insert(tk.END, content)
+
+                # Llamar al analizador léxico
+                self.mostrar_analisis_lexico(content)
+                 # Llamar al analizador léxico
+                self.colorear(content)
+
             self.title(self.ruta_archivo)
             self.estado_archivo = 2
             self.nombre_archivo = os.path.basename(self.ruta_archivo)
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
+
+    def mostrar_analisis_lexico(self, contenido):
+        # Llamar al analizador léxico
+        analisis, errores = analizador_lexico(contenido)
+
+        # Limpiar y mostrar el resultado en la interfaz gráfica
+        self.lexico_tab.configure(state="normal")
+        self.lexico_tab.delete("1.0", tk.END)
+        self.errores_tab.configure(state="normal")
+        self.errores_tab.delete("1.0", tk.END)
+        
+        for lexema in analisis:
+            if lexema[1] == "ERROR":
+                self.errores_tab.insert(tk.END, f"{lexema[0]}\n")
+            else:
+                # Agregar el token con color dependiendo del tipo
+                color = "black"
+                if lexema[1] == "PALABRA_RESERVADA":
+                    color = "blue"
+                elif lexema[1] == "IDENTIFICADOR":
+                    color = "green"
+                elif lexema[1] == "NUMERO":
+                    color = "orange"
+                elif lexema[1] == "OP_ARITMETICO":
+                    color = "red"
+                elif lexema[1] == "OP_RELACIONAL":
+                    color = "purple"
+                elif lexema[1] == "OP_LOGICO":
+                    color = "gray"
+                elif lexema[1] == "SIMBOLO":
+                    color = "pink"
+                elif lexema[1] == "ASIGNACION":
+                    color = "brown"
+                elif lexema[1] == "DECREMENTO":
+                    color = "yellow"
+                elif lexema[1] == "INCREMENTO":
+                    color = "cyan"
+
+                self.lexico_tab.insert(tk.END, f"{lexema[0]}\t{lexema[1]}\n", (lexema[1], color))
+        
+        for error in errores:
+            self.errores_tab.insert(tk.END, f"Error en línea {error[0]}, columna {error[1]}\n")
+        
+        self.lexico_tab.configure(state="disabled")
+        self.errores_tab.configure(state="disabled")
+
+    def colorear(self, contenido):
+        # Llamar al analizador léxico
+        analisis, errores = analizador_lexico(contenido)
+
+        # Limpiar y mostrar el resultado en la interfaz gráfica
+        self.code_textbox.configure(state="normal")
+        self.code_textbox.delete("1.0", tk.END)
+        self.code_textbox.insert(tk.END, contenido)
+
+        for lexema in analisis:
+            token_texto = lexema[0]
+            token_tipo = lexema[1]
+
+            # Determinar el color según el tipo de token
+            color = "black"
+            if token_tipo == "PALABRA_RESERVADA":
+                color = "blue"
+            elif token_tipo == "IDENTIFICADOR":
+                color = "green"
+            elif token_tipo == "NUMERO":
+                color = "orange"
+            elif token_tipo == "OP_ARITMETICO":
+                color = "red"
+            elif token_tipo == "OP_RELACIONAL":
+                color = "purple"
+            elif token_tipo == "OP_LOGICO":
+                color = "gray"
+            elif token_tipo == "SIMBOLO":
+                color = "pink"
+            elif token_tipo == "ASIGNACION":
+                color = "brown"
+            elif token_tipo == "DECREMENTO":
+                color = "yellow"
+            elif token_tipo == "INCREMENTO":
+                color = "cyan"
+
+            # Resaltar la palabra con el color correspondiente
+            start_index = "1.0"
+            while True:
+                start_index = self.code_textbox.search(token_texto, start_index, stopindex=tk.END)
+                if not start_index:
+                    break
+                end_index = self.code_textbox.index(f"{start_index}+{len(token_texto)}c")
+                self.code_textbox.tag_add(token_tipo, start_index, end_index)
+                self.code_textbox.tag_config(token_tipo, foreground=color)
+                start_index = end_index
+
+        for error in errores:
+            self.errores_tab.insert(tk.END, f"Error en línea {error[0]}, columna {error[1]}\n")
+
+        #self.code_textbox.configure(state="disabled")
 
     def guardar_archivo(self, *args):
         if self.ruta_archivo:
@@ -374,7 +489,7 @@ class App(ctk.CTk):
                 self.nuevo_archivo(self)
             elif self.adv_op == "Cerrar":
                 self.cerrar_archivo(self)
-        
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()

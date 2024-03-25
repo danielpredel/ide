@@ -29,6 +29,7 @@ def analizador_lexico(codigo):
     buffer = ''
     lexema = ''
     analisis = []
+    errores = []  # Lista para almacenar errores
     estado = 0
     col_archivo = 1
     row_archivo = 1
@@ -94,10 +95,10 @@ def analizador_lexico(codigo):
             lexema = ''
             estado = 0
         elif estado == "e":
-            print(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
+            errores.append((row_archivo, col_archivo - 1))  # Almacenar el error
             estado = 0
         elif estado == "E":
-            print(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
+            errores.append((row_archivo, col_archivo - 1))  # Almacenar el error
             lexema = lexema[:-1]
             if lexema:
                 analisis.append([lexema,tokens[0]])
@@ -105,7 +106,7 @@ def analizador_lexico(codigo):
             buffer = caracter
             estado = 0
     
-    return analisis
+    return analisis, errores
 
 def get_col(c):
     simbolos_p1 = [".","_","!","<",">","=","/","*"]
