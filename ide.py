@@ -25,6 +25,8 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.editor_font_size = 12
+
         # Configuracion de la ventana principal
         self.title("Super IDE")
         self.geometry(f"{1100}x{580}")
@@ -180,7 +182,23 @@ class App(ctk.CTk):
         self.lexico_tab.tag_config("ASIGNACION", foreground="brown")
         self.lexico_tab.tag_config("DECREMENTO", foreground="yellow")
         self.lexico_tab.tag_config("INCREMENTO", foreground="cyan")
+
+        # Vincular eventos de teclado
+        self.bind('<Control-plus>', self.aumentar_fuente)
+        self.bind('<Control-minus>', self.disminuir_fuente)
     
+    def aumentar_fuente(self, event):
+        self.editor_font_size += 1
+        self.code_textbox.configure(font=("Helvetica", self.editor_font_size))
+        self.estado_archivo = 2  # Establecer el estado del archivo como guardado
+
+    def disminuir_fuente(self, event):
+        if self.editor_font_size > 1:
+            self.editor_font_size -= 1
+            self.code_textbox.configure(font=("Helvetica", self.editor_font_size))
+            self.estado_archivo = 2  # Establecer el estado del archivo como guardado
+
+
     def operacion_archivo(self, operacion: str):
         # Transiscion entre estados del archivo
         #           Nuevo   Abrir   Cerrar  Guardar Guardar como
