@@ -4,7 +4,7 @@ import customtkinter as ctk
 from tkinter import filedialog
 from PIL import Image
 from lexico import analizador_lexico
-
+import re
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -93,7 +93,17 @@ class App(ctk.CTk):
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
         self.code_textbox.bind('<ButtonRelease-1>', self.on_click)
-        
+
+          # Agregar la letra "a" al inicio del editor de texto
+        self.code_textbox.insert(tk.END, 'a')
+
+        # Restablecer el cursor al inicio
+        self.code_textbox.mark_set(tk.INSERT, "1.0")
+
+        # Eliminar la letra "a" agregada al inicio después de un breve tiempo
+        self.after(100, self.eliminar_letra_a)
+
+  
         # Outputs para analizadores, errores y ejecucion
         # Frame
         self.output_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -198,7 +208,19 @@ class App(ctk.CTk):
             self.code_textbox.configure(font=("Helvetica", self.editor_font_size))
             self.estado_archivo = 2  # Establecer el estado del archivo como guardado
 
-
+    def eliminar_letra_a(self):
+ 
+     # Llamar al analizador léxico y al coloreado
+        contenido = self.code_textbox.get("1.0", "end-1c")  # end-1c evita el último carácter (nueva línea)
+        self.mostrar_analisis_lexico(contenido)
+        self.colorear(contenido) 
+          # Eliminar la letra "a" agregada al inicio del editor de texto
+        self.code_textbox.delete("1.0") 
+        # Limpiar el contenido del TextBox de análisis léxico
+        self.lexico_tab.configure(state="normal")
+        self.lexico_tab.delete("1.0", tk.END)
+        self.lexico_tab.configure(state="disabled")
+    
     def operacion_archivo(self, operacion: str):
         # Transiscion entre estados del archivo
         #           Nuevo   Abrir   Cerrar  Guardar Guardar como
@@ -271,13 +293,19 @@ class App(ctk.CTk):
         if self.ruta_archivo:
             with open(self.ruta_archivo, 'r') as file:
                 content = file.read()
+
+                # Agregar una letra "a" al inicio del contenido
+                content = 'a' + content
+
                 self.code_textbox.delete("1.0", tk.END)
                 self.code_textbox.insert(tk.END, content)
 
-                # Llamar al analizador léxico
+                # Llamar al analizador léxico y al coloreado
                 self.mostrar_analisis_lexico(content)
-                 # Llamar al analizador léxico
                 self.colorear(content)
+
+                # Eliminar la letra "a" agregada al inicio
+                self.code_textbox.delete("1.0")
 
             self.title(self.ruta_archivo)
             self.estado_archivo = 2
@@ -285,6 +313,8 @@ class App(ctk.CTk):
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
+
+
 
     def mostrar_analisis_lexico(self, contenido):
         # Llamar al analizador léxico
@@ -437,6 +467,7 @@ class App(ctk.CTk):
         else:
             self.title(f"{self.ruta_archivo} *")
         self.actualizar_archivo_label()
+          
 
     def on_click(self, *args):
         self.actualizar_posicion_cursor()
@@ -462,6 +493,7 @@ class App(ctk.CTk):
                 self.line_textbox.insert(tk.END, f"{i}")
         
         self.line_textbox.configure(state="disabled")
+          
 
     def actualizar_posicion_cursor(self, *args):
         # Obtiene la posición del cursor
@@ -476,6 +508,9 @@ class App(ctk.CTk):
         self.line_col_label.delete("0.0", "end")
         self.line_col_label.insert("0.0", f"Ln {linea}, Col {col}")
         self.line_col_label.configure(state="disabled")
+      
+       
+        
     
     def actualizar_archivo_label(self, *args):
         self.archivo_label.configure(state="normal")
@@ -487,6 +522,7 @@ class App(ctk.CTk):
             self.archivo_label.insert("0.0", f"{self.nombre_archivo}")
         
         self.archivo_label.configure(state="disabled")
+       
     
     def generar_confirmacion(self, *args):
         # Crear la ventana de advertencia
