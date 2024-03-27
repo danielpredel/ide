@@ -220,6 +220,7 @@ class App(ctk.CTk):
         self.lexico_tab.configure(state="normal")
         self.lexico_tab.delete("1.0", tk.END)
         self.lexico_tab.configure(state="disabled")
+        
     
     def operacion_archivo(self, operacion: str):
         # Transiscion entre estados del archivo
@@ -288,24 +289,14 @@ class App(ctk.CTk):
         self.actualizar_posicion_cursor()
 
     def abrir_archivo(self, *args):
-        self.ruta_archivo = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        self.ruta_archivo = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text Files", ".txt"), ("All Files", ".*")])
 
         if self.ruta_archivo:
             with open(self.ruta_archivo, 'r') as file:
                 content = file.read()
-
-                # Agregar una letra "a" al inicio del contenido
-                content = 'a' + content
-
-                self.code_textbox.delete("1.0", tk.END)
-                self.code_textbox.insert(tk.END, content)
-
                 # Llamar al analizador léxico y al coloreado
                 self.mostrar_analisis_lexico(content)
                 self.colorear(content)
-
-                # Eliminar la letra "a" agregada al inicio
-                self.code_textbox.delete("1.0")
 
             self.title(self.ruta_archivo)
             self.estado_archivo = 2
@@ -313,8 +304,6 @@ class App(ctk.CTk):
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
-
-
 
     def mostrar_analisis_lexico(self, contenido):
         # Llamar al analizador léxico
@@ -357,6 +346,17 @@ class App(ctk.CTk):
         
         for error in errores:
             self.errores_tab.insert(tk.END, f"Error en línea {error[0]}, columna {error[1]}\n")
+
+        # Abrir o crear el archivo para registrar el análisis léxico
+        with open("analisis_lexico.txt", "w") as f_lexico:
+            for lexema in analisis:
+                if lexema[1] != "ERROR":
+                    f_lexico.write(f"Lexema: {lexema[0]}, Token: {lexema[1]}\n")
+
+        # Abrir o crear el archivo para registrar los errores léxicos
+        with open("errores_lexico.txt", "w") as f_errores:
+            for error in errores:
+                f_errores.write(f"Error en linea {error[0]}, columna {error[1]}\n")
         
         self.lexico_tab.configure(state="disabled")
         self.errores_tab.configure(state="disabled")
@@ -396,6 +396,8 @@ class App(ctk.CTk):
                 color = "yellow"
             elif token_tipo == "INCREMENTO":
                 color = "cyan"
+            
+            #print(f"Lexema: {token_texto}, Tipo de Token: {token_tipo}, Color: {color}")
 
             # Resaltar la palabra con el color correspondiente
             start_index = "1.0"
