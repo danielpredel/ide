@@ -1,34 +1,16 @@
+import os
+import sys
 import re
-
-# Orden de la matriz de transicion:
-# dig|letra| . | _ | ! | < | > | = | / | * | \n | + | - | % | ^ | ( | ) | { | } | , | ; | & | "|" | " " | \t | otro    
-matriz = [
-    ["2","5","e","6","7","8","8","8","9","D","0","1","13","D","D","D","D","D","D","D","D","D","D","0","0","e"],
-    ["2","d","d","d","d","d","d","d","d","d","d","D","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["2","d","3","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["4","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E"],
-    ["4","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["5","5","d","5","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["5","5","E","5","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E"],
-    ["E","E","E","E","E","E","E","D","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E","E"],
-    ["d","d","d","d","d","d","d","D","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["d","d","d","d","d","d","d","d","10","11","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d","d"],
-    ["10","10","10","10","10","10","10","10","10","10","D","10","10","10","10","10","10","10","10","10","10","10","10","10","10","10"],
-    ["11","11","11","11","11","11","11","11","11","12","11","11","11","11","11","11","11","11","11","11","11","11","11","11","11","11"],
-    ["11","11","11","11","11","11","11","11","D","12","11","11","11","11","11","11","11","11","11","11","11","11","11","11","11","11"],
-    ["2","d","d","d","d","d","d","d","d","d","d","d","D","d","d","d","d","d","d","d","d","d","d","d","d","d"]
-]
-
-tokens = ["NUMERO","IDENTIFICADOR","PALABRA_RESERVADA","OP_ARITMETICO","OP_RELACIONAL","OP_LOGICO","SIMBOLO",
-          "ASIGNACION","INCREMENTO","DECREMENTO"]
-
-palabras_reservadas = ["if","else","do","while","switch","case","integer","double","main","cin","cout"]
+from matriz_transicion import matriz
+from tokens import *
+from tabulate import tabulate
 
 def analizador_lexico(codigo):
     codigo += '\n'
     buffer = ''
     lexema = ''
     analisis = []
+    errores = []
     estado = 0
     col_archivo = 1
     row_archivo = 1
@@ -40,12 +22,7 @@ def analizador_lexico(codigo):
         if buffer == '':
             caracter = codigo[index]
             index += 1
-            col_archivo += 1
-            
             col = get_col(caracter)
-            if col == 10:
-                row_archivo += 1
-                col_archivo = 1
         else:
             caracter = buffer
             buffer = ''
@@ -56,56 +33,86 @@ def analizador_lexico(codigo):
         if estado.isdigit():
             if int(estado) > 0:
                 lexema += caracter
+                col_archivo += 1
+            else:
+                col_archivo += 1
+                if col == 10:
+                    row_archivo += 1
+                    col_archivo = 1
         elif estado == "D":
             lexema += caracter
             if row == 0:
-                if col < 15:
-                    analisis.append([lexema,tokens[3]])
-                elif col >= 15 and col <= 20:
-                    analisis.append([lexema,tokens[6]])
-                else:
-                    analisis.append([lexema,tokens[5]])
+                if col == 9:
+                    analisis.append([lexema,tokens[3],sub_tokens[15],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 13:
+                    analisis.append([lexema,tokens[3],sub_tokens[17],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 14:
+                    analisis.append([lexema,tokens[3],sub_tokens[18],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 15:
+                    analisis.append([lexema,tokens[6],sub_tokens[27],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 16:
+                    analisis.append([lexema,tokens[6],sub_tokens[28],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 17:
+                    analisis.append([lexema,tokens[6],sub_tokens[29],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 18:
+                    analisis.append([lexema,tokens[6],sub_tokens[30],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 19:
+                    analisis.append([lexema,tokens[6],sub_tokens[31],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 20:
+                    analisis.append([lexema,tokens[6],sub_tokens[32],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 21:
+                    analisis.append([lexema,tokens[5],sub_tokens[25],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if col == 22:
+                    analisis.append([lexema,tokens[5],sub_tokens[26],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 1:
-                analisis.append([lexema,tokens[8]])
-            elif row == 7 or row == 8:
-                analisis.append([lexema,tokens[4]])
+                analisis.append([lexema,tokens[3],sub_tokens[33],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+            elif row == 7:
+                analisis.append([lexema,tokens[4],sub_tokens[23],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+            elif row == 8:
+                analisis.append([lexema,tokens[4],sub_tokens[24],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+            # Aqui van los casos para los comentarios 10 y 12 (color)
             elif row == 13:
-                analisis.append([lexema,tokens[9]])
+                analisis.append([lexema,tokens[3],sub_tokens[34],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+            col_archivo += 1
             lexema = ''
             estado = 0
         elif estado == "d":
             buffer = caracter
-            if row == 1 or row == 9 or row == 13:
-                analisis.append([lexema,tokens[3]])
+            if row == 1:
+                analisis.append([lexema,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 2:
-                analisis.append([lexema,tokens[0]])
+                analisis.append([lexema,tokens[0],sub_tokens[0],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 4:
-                analisis.append([lexema,tokens[0]])
+                analisis.append([lexema,tokens[0],sub_tokens[1],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 5:
                 if lexema in palabras_reservadas:
-                    analisis.append([lexema,tokens[2]])
+                    analisis.append([lexema,tokens[2],lexema.upper(),row_archivo,col_archivo-len(lexema),col_archivo])
                 else:
-                    analisis.append([lexema,tokens[1]])
+                    analisis.append([lexema,tokens[1],tokens[1],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 8:
                 if lexema == "=":
-                    analisis.append([lexema,tokens[7]])
-                else:
-                    analisis.append([lexema,tokens[4]])
+                    analisis.append([lexema,tokens[7],tokens[7],row_archivo,col_archivo-len(lexema),col_archivo])
+                elif lexema == "<":
+                    analisis.append([lexema,tokens[4],sub_tokens[19],row_archivo,col_archivo-len(lexema),col_archivo])
+                elif lexema == ">":
+                    analisis.append([lexema,tokens[4],sub_tokens[21],row_archivo,col_archivo-len(lexema),col_archivo])
+            if row == 9:
+                analisis.append([lexema,tokens[3],sub_tokens[16],row_archivo,col_archivo-len(lexema),col_archivo])
+            if row == 13:
+                analisis.append([lexema,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo])
             lexema = ''
+            # col_archivo += 1
             estado = 0
         elif estado == "e":
-            print(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
+            col_archivo += 1
+            errores.append(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
             estado = 0
         elif estado == "E":
-            print(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
-            lexema = lexema[:-1]
-            if lexema:
-                analisis.append([lexema,tokens[0]])
-                lexema = ''
+            errores.append(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
+            lexema = ''
             buffer = caracter
             estado = 0
-    
-    return analisis
+    return analisis, errores
 
 def get_col(c):
     simbolos_p1 = [".","_","!","<",">","=","/","*"]
@@ -139,87 +146,54 @@ def get_col(c):
         return 24
     return 25
 
-# codigo = """//inicio del codigo
-# var = 12.12;
+def escribir_archivos(tabla_analisis, errores):
+    parent_directory = os.path.dirname(__file__)
+    dirname = 'analisis_lexico'
+    abs_dir = os.path.join(parent_directory,dirname)
+    filenames = ['analisis.txt','errores.txt']
 
-# if(var >= 10){
-#     mayus();
-# }
-# else {
-#     minus();  
-# }
+    if os.path.isdir(abs_dir):
+        abs_path = os.path.join(abs_dir,filenames[0])
+        with open(abs_path, "w") as archivo:
+            archivo.write(tabla_analisis)
+            
+        abs_path = os.path.join(abs_dir,filenames[1])
+        with open(abs_path, "w") as archivo:
+            for error in errores:
+                archivo.write(f'{error}\n')
+    else:
+        try:
+            os.mkdir(abs_dir)
+            abs_path = os.path.join(abs_dir,filenames[0])
+            with open(abs_path, "w") as archivo:
+                archivo.write(tabla_analisis)
+                
+            abs_path = os.path.join(abs_dir,filenames[1])
+            with open(abs_path, "w") as archivo:
+                for error in errores:
+                    archivo.write(f'{error}\n')
+        except:
+            pass
 
-# my_id = 12345.
+def leer_archivo(filepath):
+    codigo = ''
+    if os.path.exists(filepath):
+        with open(filepath, "r") as archivo:
+            codigo = archivo.read()
+    else:
+        print("El archivo no existe.")
+    
+    return codigo
 
-# _ = error
-
-# int an@lizador
-
-# var = 123
-# var++
-# var--
-
-# /*
-# comentario 
-# multilinea
-# ****/
-
-# if (!true){
-#     exit()
-# }"""
-
-codigo = """main sum@r 3.14+main)if{32.algo
-34.34.34.34
-{
-int x,y,z;
-real a,b,c;
- suma=45;
-x=32.32;
-x=23;
-y=2+3-1;
-z=y+7;
-y=y+1;
-a=24.0+4-1/3*2+34-1;
-x=(5-3)*(8/2);
-y=5+3-2*4/7-9;
-z=8/2+15*4;
-y=14.54;
-if(2>3)then
-        y=a+3;
-  else
-      if(4>2 & )then
-             b=3.2;
-       else
-           b=5.0;
-       end;
-       y=y+1;
-end;
-a+
-
-+;
-c--;
-x=3+4;
-do
-   y=(y+1)*2+1;
-   while(x>7){x=6+8/9*8/3;   
-    cin x; 
-   mas=36/7; 
-   };
-
- until(y=
-
-
-=
-
-
-
-5);
- while(y==0){
-    cin mas;
-    cout x;
-};
-}"""
-
-analisis = analizador_lexico(codigo)
-for lexema in analisis:
-    print(f"{lexema[0]}\t{lexema[1]}")
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print('Faltan parametros')
+    elif len(sys.argv) == 2:
+        archivo = sys.argv[1]
+        codigo = leer_archivo(archivo)
+        analisis, errores = analizador_lexico(codigo)
+        encabezados = ["Lexema", "Token", "Subtoken"]
+        tabla_analisis = tabulate(analisis, tablefmt="plain")
+        escribir_archivos(tabla_analisis,errores)
+    else:
+        print('Demasidados parametros')

@@ -243,6 +243,15 @@ class App(ctk.CTk):
                 content = file.read()
                 self.code_textbox.delete("1.0", tk.END)
                 self.code_textbox.insert(tk.END, content)
+                
+                # Borrar esto solo prueba
+                self.code_textbox.configure(state="normal")
+                start_index = "2.5"
+                end_index = "2.6"
+                self.code_textbox.tag_add("PRUEBA", start_index, end_index)
+                self.code_textbox.tag_config("PRUEBA", foreground="red")
+                
+                
             self.title(self.ruta_archivo)
             self.estado_archivo = 2
             self.nombre_archivo = os.path.basename(self.ruta_archivo)
