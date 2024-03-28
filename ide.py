@@ -166,7 +166,7 @@ class App(ctk.CTk):
         # Label line-col
         self.line_col_label = ctk.CTkTextbox(self.output_frame, height=20)
         self.line_col_label.grid(row=2, column=0, padx=(10,20), pady=(20,20), sticky="ew")
-        self.line_col_label.insert("0.0", "Ln 1, Col 0")
+        self.line_col_label.insert("0.0", "Ln 1, Col 1")
         self.line_col_label.configure(state="disabled")
 
     def operacion_archivo(self, operacion: str):
@@ -317,7 +317,7 @@ class App(ctk.CTk):
         
         # Extrae la parte antes del "." para obtener el número de línea
         linea = cursor_pos.split('.')[0]
-        col = cursor_pos.split('.')[1]
+        col = int(cursor_pos.split('.')[1]) + 1
         
         # Actualiza la etiqueta con la información de la línea actual
         self.line_col_label.configure(state="normal")
