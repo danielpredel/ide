@@ -173,6 +173,7 @@ def escribir_archivos(tabla_analisis, errores):
                 for error in errores:
                     archivo.write(f'{error}\n')
         except:
+            print(f'Error al trabajar en el directorio: {abs_dir}')
             pass
 
 def leer_archivo(filepath):
@@ -181,13 +182,13 @@ def leer_archivo(filepath):
         with open(filepath, "r") as archivo:
             codigo = archivo.read()
     else:
-        print("El archivo no existe.")
+        print("El archivo no existe")
     
     return codigo
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        print('Faltan parametros')
+        print('Falta el archivo fuente')
     elif len(sys.argv) == 2:
         archivo = sys.argv[1]
         codigo = leer_archivo(archivo)
@@ -195,5 +196,3 @@ if __name__ == "__main__":
         encabezados = ["Lexema", "Token", "Subtoken"]
         tabla_analisis = tabulate(analisis, tablefmt="plain")
         escribir_archivos(tabla_analisis,errores)
-    else:
-        print('Demasidados parametros')

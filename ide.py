@@ -4,6 +4,11 @@ import customtkinter as ctk
 from tkinter import filedialog
 from PIL import Image
 
+import subprocess
+from threading import Thread
+import time
+from tabulate import tabulate
+
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -13,6 +18,8 @@ class App(ctk.CTk):
     icons = ["open_file.png","close_file.png","new_file.png","save_file.png","save_as_file.png","build.png","run.png"]
     icons_dirname = "icons"
     icon_images = []
+    resultado_lexico = ''
+    analisis_lexico = []
     
     # Estado del archivo:
     # 0 - nuevo
@@ -68,10 +75,10 @@ class App(ctk.CTk):
         self.save_as_file_button.grid(row=0, column=7, padx=5, pady=10)
         
         # Botones compilar y ejecutar
-        build_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[5], width=40)
-        build_button.grid(row=0, column=8, padx=5, pady=10)
-        run_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[6], width=40)
-        run_button.grid(row=0, column=9, padx=5, pady=10)
+        self.build_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[5], width=40, command=self.build_file)
+        self.build_button.grid(row=0, column=8, padx=5, pady=10)
+        self.run_button = ctk.CTkButton(self.menu_frame, text=None, image=self.icon_images[6], width=40)
+        self.run_button.grid(row=0, column=9, padx=5, pady=10)
         
         # Editor de Codigo
         # Frame del Editor
@@ -81,11 +88,11 @@ class App(ctk.CTk):
         self.editor_frame.grid_columnconfigure(1, weight=1)
         
         # Textbox para numero de linea
-        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word', activate_scrollbars=False,state="disabled")
+        self.line_textbox = ctk.CTkTextbox(self.editor_frame, width=50, wrap='word', activate_scrollbars=False,state="disabled",font=("TkDefaultFont", 15))
         self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(10,20), sticky="nsew")
         
         # Textbox para editor de codigo
-        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none', activate_scrollbars=False)
+        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none', activate_scrollbars=False,font=("TkDefaultFont", 15))
         self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=(10,20), sticky="nsew")
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
@@ -110,7 +117,7 @@ class App(ctk.CTk):
         # Textbox de salida para Analisis Lexico
         self.analisis_tabview.tab("Lexico").grid_columnconfigure(0, weight=1)
         self.analisis_tabview.tab("Lexico").grid_rowconfigure(0, weight=1)
-        self.lexico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Lexico"), wrap='word')
+        self.lexico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Lexico"), wrap='none')
         self.lexico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
         self.lexico_tab.configure(state="disabled")
         
@@ -245,11 +252,11 @@ class App(ctk.CTk):
                 self.code_textbox.insert(tk.END, content)
                 
                 # Borrar esto solo prueba
-                self.code_textbox.configure(state="normal")
-                start_index = "2.5"
-                end_index = "2.6"
-                self.code_textbox.tag_add("PRUEBA", start_index, end_index)
-                self.code_textbox.tag_config("PRUEBA", foreground="red")
+                # self.code_textbox.configure(state="normal")
+                # start_index = "2.5"
+                # end_index = "2.6"
+                # self.code_textbox.tag_add("PRUEBA", start_index, end_index)
+                # self.code_textbox.tag_config("PRUEBA", foreground="red")
                 
                 
             self.title(self.ruta_archivo)
@@ -258,6 +265,9 @@ class App(ctk.CTk):
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
+            
+            # Prueba de analisis lexico en apertura de archivo
+            self.hilo_lexico(self)
 
     def guardar_archivo(self, *args):
         if self.ruta_archivo:
@@ -383,7 +393,76 @@ class App(ctk.CTk):
                 self.nuevo_archivo(self)
             elif self.adv_op == "Cerrar":
                 self.cerrar_archivo(self)
+
+    def build_file(self, *args):
+        if not self.ruta_archivo:
+            self.guardar_como_archivo(self)
+        else:
+            self.hilo_lexico(self)
         
+    def analizar_lexico(self, *args):
+        # proceso = subprocess.run(["python", "lexico.py", "nada"], capture_output=True)
+        proceso = subprocess.run(["python", "lexico.py", self.ruta_archivo], capture_output=True)
+        self.resultado_lexico = proceso.stdout.decode("utf-8")
+    
+    def hilo_lexico(self, *args):
+        hilo = Thread(target=self.analizar_lexico)
+        hilo.start()
+
+        while hilo.is_alive():
+            time.sleep(0.1)
+        
+        if self.resultado_lexico:
+            self.errores_tab.configure(state="normal")
+            self.errores_tab.delete("0.0", "end")
+            self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
+            self.errores_tab.configure(state="disabled")
+        else:
+            self.analisis_lexico, errores = self.leer_analisis_lexico(self)
+                
+            # encabezados = ["LEXEMA", "TOKEN", "SUBTOKEN","FILA","COL_I","COL_F"]
+            # tabla_analisis = tabulate(self.analisis_lexico, headers=encabezados, tablefmt="plain")
+            
+            
+            self.lexico_tab.configure(state="normal")
+            self.lexico_tab.delete("0.0", "end")
+            self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
+            for lexema in self.analisis_lexico:
+                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
+            self.lexico_tab.configure(state="disabled")
+            
+            self.errores_tab.configure(state="normal")
+            self.errores_tab.delete("0.0", "end")
+            self.errores_tab.insert("0.0", f"{errores}")
+            self.errores_tab.configure(state="disabled")
+            
+    def leer_analisis_lexico(self, *args):
+        analisis = []
+        dirname = 'analisis_lexico'
+        filename = 'analisis.txt'
+        abs_path = os.path.join(dirname,filename)
+        if os.path.exists(abs_path):
+            with open(abs_path, "r") as archivo:
+                lineas = archivo.readlines()
+            for linea in lineas:
+                lexema = linea.split()
+                analisis.append(lexema)    
+        else:
+            print("El archivo {abs_path} no existe")
+        
+        errores = ''
+        dirname = 'analisis_lexico'
+        filename = 'errores.txt'
+        abs_path = os.path.join(dirname,filename)
+        if os.path.exists(abs_path):
+            with open(abs_path, "r") as archivo:
+                errores = archivo.read()   
+        else:
+            print("El archivo {abs_path} no existe")
+        
+        return analisis, errores
+        
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()
