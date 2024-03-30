@@ -3,11 +3,11 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 from PIL import Image
-
 import subprocess
 from threading import Thread
 import time
 from tabulate import tabulate
+from tokens import tokens
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -92,7 +92,7 @@ class App(ctk.CTk):
         self.line_textbox.grid(row=0, column=0, padx=(20,0), pady=(10,20), sticky="nsew")
         
         # Textbox para editor de codigo
-        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none', activate_scrollbars=False,font=("TkDefaultFont", 15))
+        self.code_textbox = ctk.CTkTextbox(self.editor_frame, wrap='none', activate_scrollbars=False,font=("TkDefaultFont", 15), text_color="black")
         self.code_textbox.grid(row=0, column=1, padx=(10,10), pady=(10,20), sticky="nsew")
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
@@ -304,6 +304,14 @@ class App(ctk.CTk):
         else:
             self.title(f"{self.ruta_archivo} *")
         self.actualizar_archivo_label()
+        
+        # Borrar esto, solo prueba de rendimiento
+        # Funciona bien, pero obviamente al escribir mucho se traba
+        # esto significa que un analizador lexico por casos (linea o bloque)
+        # funcionara de forma optima
+        # self.guardar_archivo(self)
+        # self.hilo_lexico(self)
+        
 
     def on_click(self, *args):
         self.actualizar_posicion_cursor()
@@ -412,29 +420,27 @@ class App(ctk.CTk):
         while hilo.is_alive():
             time.sleep(0.1)
         
-        if self.resultado_lexico:
-            self.errores_tab.configure(state="normal")
-            self.errores_tab.delete("0.0", "end")
-            self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
-            self.errores_tab.configure(state="disabled")
-        else:
-            self.analisis_lexico, errores = self.leer_analisis_lexico(self)
-                
-            # encabezados = ["LEXEMA", "TOKEN", "SUBTOKEN","FILA","COL_I","COL_F"]
-            # tabla_analisis = tabulate(self.analisis_lexico, headers=encabezados, tablefmt="plain")
+        self.mostrar_analisis_lexico(self)
+        self.style_code(self)
+        
+        # if self.resultado_lexico:
+        #     self.errores_tab.configure(state="normal")
+        #     self.errores_tab.delete("0.0", "end")
+        #     self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
+        #     self.errores_tab.configure(state="disabled")
+        # else:
+        #     self.analisis_lexico, errores = self.leer_analisis_lexico(self)
+        #     self.lexico_tab.configure(state="normal")
+        #     self.lexico_tab.delete("0.0", "end")
+        #     self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
+        #     for lexema in self.analisis_lexico:
+        #         self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
+        #     self.lexico_tab.configure(state="disabled")
             
-            
-            self.lexico_tab.configure(state="normal")
-            self.lexico_tab.delete("0.0", "end")
-            self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
-            for lexema in self.analisis_lexico:
-                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
-            self.lexico_tab.configure(state="disabled")
-            
-            self.errores_tab.configure(state="normal")
-            self.errores_tab.delete("0.0", "end")
-            self.errores_tab.insert("0.0", f"{errores}")
-            self.errores_tab.configure(state="disabled")
+        #     self.errores_tab.configure(state="normal")
+        #     self.errores_tab.delete("0.0", "end")
+        #     self.errores_tab.insert("0.0", f"{errores}")
+        #     self.errores_tab.configure(state="disabled")
             
     def leer_analisis_lexico(self, *args):
         analisis = []
@@ -461,6 +467,49 @@ class App(ctk.CTk):
             print("El archivo {abs_path} no existe")
         
         return analisis, errores
+     
+    def mostrar_analisis_lexico(self, *args):
+        if self.resultado_lexico:
+            self.errores_tab.configure(state="normal")
+            self.errores_tab.delete("0.0", "end")
+            self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
+            self.errores_tab.configure(state="disabled")
+        else:
+            self.analisis_lexico, errores = self.leer_analisis_lexico(self)
+            self.lexico_tab.configure(state="normal")
+            self.lexico_tab.delete("0.0", "end")
+            self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
+            for lexema in self.analisis_lexico:
+                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
+            self.lexico_tab.configure(state="disabled")
+            
+            self.errores_tab.configure(state="normal")
+            self.errores_tab.delete("0.0", "end")
+            self.errores_tab.insert("0.0", f"{errores}")
+            self.errores_tab.configure(state="disabled")
+    
+    def style_code(self, *args):
+        colores = ['#e5c07b','#61afef','#d55fde','#ef596f','#78f536',
+                   '#2bbac5','#ffffff','#ef596f','#7f848e']
+        # numeros               amarillo = '#e5c07b'
+        # identificadores       azul = '#61afef'
+        # palabras reservadas   rosa = '#d55fde'
+        # ops aritmeticos       rojo = '#ef596f'
+        # ops relacionales      verde = '#78f536'
+        # ops logicos           azul_claro = '#2bbac5'
+        # simbolos              blanco = '#ffffff'
+        # asignacion            rojo = '#ef596f'
+        # comentarios           gris = '#7f848e'
+        
+        # self.code_textbox.configure(state="normal")
+        for lexema in self.analisis_lexico:
+            token = tokens.index(lexema[1])
+            start_index = f"{lexema[3]}.{int(lexema[4])-1}"
+            end_index = f"{lexema[3]}.{int(lexema[5])-1}"
+            self.code_textbox.tag_add(lexema[1], start_index, end_index)
+            self.code_textbox.tag_config(lexema[1], foreground=colores[token])
+        
+        
         
 
 if __name__ == "__main__":

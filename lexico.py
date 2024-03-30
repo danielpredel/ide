@@ -11,6 +11,7 @@ def analizador_lexico(codigo):
     lexema = ''
     analisis = []
     errores = []
+    comentarios = []
     estado = 0
     col_archivo = 1
     row_archivo = 1
@@ -101,7 +102,6 @@ def analizador_lexico(codigo):
             if row == 13:
                 analisis.append([lexema,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo])
             lexema = ''
-            # col_archivo += 1
             estado = 0
         elif estado == "e":
             col_archivo += 1
