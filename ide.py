@@ -20,6 +20,7 @@ class App(ctk.CTk):
     icon_images = []
     resultado_lexico = ''
     analisis_lexico = []
+    comentarios = []
     
     # Estado del archivo:
     # 0 - nuevo
@@ -412,25 +413,6 @@ class App(ctk.CTk):
         
         self.mostrar_analisis_lexico(self)
         self.style_code(self)
-        
-        # if self.resultado_lexico:
-        #     self.errores_tab.configure(state="normal")
-        #     self.errores_tab.delete("0.0", "end")
-        #     self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
-        #     self.errores_tab.configure(state="disabled")
-        # else:
-        #     self.analisis_lexico, errores = self.leer_analisis_lexico(self)
-        #     self.lexico_tab.configure(state="normal")
-        #     self.lexico_tab.delete("0.0", "end")
-        #     self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
-        #     for lexema in self.analisis_lexico:
-        #         self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
-        #     self.lexico_tab.configure(state="disabled")
-            
-        #     self.errores_tab.configure(state="normal")
-        #     self.errores_tab.delete("0.0", "end")
-        #     self.errores_tab.insert("0.0", f"{errores}")
-        #     self.errores_tab.configure(state="disabled")
             
     def leer_analisis_lexico(self, *args):
         analisis = []
@@ -455,8 +437,22 @@ class App(ctk.CTk):
                 errores = archivo.read()   
         else:
             print("El archivo {abs_path} no existe")
+            
+        # 
+        comentarios = []
+        dirname = 'analisis_lexico'
+        filename = 'comentarios.txt'
+        abs_path = os.path.join(dirname,filename)
+        if os.path.exists(abs_path):
+            with open(abs_path, "r") as archivo:
+                lineas = archivo.readlines()
+            for linea in lineas:
+                comentario = linea.split()
+                comentarios.append(comentario)
+        else:
+            print("El archivo {abs_path} no existe")
         
-        return analisis, errores
+        return analisis, errores, comentarios
      
     def mostrar_analisis_lexico(self, *args):
         if self.resultado_lexico:
@@ -465,7 +461,7 @@ class App(ctk.CTk):
             self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
             self.errores_tab.configure(state="disabled")
         else:
-            self.analisis_lexico, errores = self.leer_analisis_lexico(self)
+            self.analisis_lexico, errores, self.comentarios = self.leer_analisis_lexico(self)
             self.lexico_tab.configure(state="normal")
             self.lexico_tab.delete("0.0", "end")
             self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
@@ -497,7 +493,14 @@ class App(ctk.CTk):
             end_index = f"{lexema[3]}.{int(lexema[5])-1}"
             self.code_textbox.tag_add(lexema[1], start_index, end_index)
             self.code_textbox.tag_config(lexema[1], foreground=colores[token])
-        
+            
+        for comentario in self.comentarios:
+            # print(comentario)
+            start_index = f"{comentario[1]}.{int(comentario[3])-1}"
+            end_index = f"{comentario[2]}.{int(comentario[4])-1}"
+            self.code_textbox.tag_add(comentario[0], start_index, end_index)
+            self.code_textbox.tag_config(comentario[0], foreground=colores[8])
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()
