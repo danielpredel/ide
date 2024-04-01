@@ -448,7 +448,7 @@ class App(ctk.CTk):
                 lexema = linea.split()
                 analisis.append(lexema)    
         else:
-            print("El archivo {abs_path} no existe")
+            print(f"El archivo {abs_path} no existe")
         
         errores = ''
         dirname = 'analisis_lexico'
@@ -458,7 +458,7 @@ class App(ctk.CTk):
             with open(abs_path, "r") as archivo:
                 errores = archivo.read()   
         else:
-            print("El archivo {abs_path} no existe")
+            print(f"El archivo {abs_path} no existe")
             
         # 
         comentarios = []
@@ -472,7 +472,7 @@ class App(ctk.CTk):
                 comentario = linea.split()
                 comentarios.append(comentario)
         else:
-            print("El archivo {abs_path} no existe")
+            print(f"El archivo {abs_path} no existe")
         
         return analisis, errores, comentarios
      
