@@ -1,6 +1,9 @@
 build/
 dist/
 env/
+analisis_lexico/analisis.txt
+analisis_lexico/comentarios.txt
+analisis_lexico/errores.txt
 analisis_lexico/
 ide.spec
 codigo.txt
