@@ -99,10 +99,7 @@ def analizador_lexico(codigo):
             estado = 0
         elif estado == "E":
             errores.append((row_archivo, col_archivo - 1))  # Almacenar el error
-            lexema = lexema[:-1]
-            if lexema:
-                analisis.append([lexema,tokens[0]])
-                lexema = ''
+            lexema = ''
             buffer = caracter
             estado = 0
     

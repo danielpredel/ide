@@ -396,8 +396,6 @@ class App(ctk.CTk):
                 color = "yellow"
             elif token_tipo == "INCREMENTO":
                 color = "cyan"
-            
-            #print(f"Lexema: {token_texto}, Tipo de Token: {token_tipo}, Color: {color}")
 
             # Resaltar la palabra con el color correspondiente
             start_index = "1.0"
@@ -406,14 +404,12 @@ class App(ctk.CTk):
                 if not start_index:
                     break
                 end_index = self.code_textbox.index(f"{start_index}+{len(token_texto)}c")
-                self.code_textbox.tag_add(token_tipo, start_index, end_index)
-                self.code_textbox.tag_config(token_tipo, foreground=color)
+                self.code_textbox.tag_add(token_texto, start_index, end_index)
+                self.code_textbox.tag_config(token_texto, foreground=color)
                 start_index = end_index
 
         for error in errores:
             self.errores_tab.insert(tk.END, f"Error en línea {error[0]}, columna {error[1]}\n")
-
-        #self.code_textbox.configure(state="disabled")
 
     def guardar_archivo(self, *args):
         if self.ruta_archivo:
