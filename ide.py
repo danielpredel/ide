@@ -6,8 +6,9 @@ from PIL import Image
 import subprocess
 from threading import Thread
 import time
-from tabulate import tabulate
 from tokens import tokens
+from colores_token import colores
+import lexico_lite
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -21,6 +22,7 @@ class App(ctk.CTk):
     resultado_lexico = ''
     analisis_lexico = []
     comentarios = []
+    editor_font_size = 15
     
     # Estado del archivo:
     # 0 - nuevo
@@ -98,6 +100,8 @@ class App(ctk.CTk):
         self.code_textbox.configure(yscrollcommand=self.on_scroll)
         self.code_textbox.bind('<KeyRelease>', self.on_key_release)
         self.code_textbox.bind('<ButtonRelease-1>', self.on_click)
+        self.code_textbox.bind('<Control-plus>', self.aumentar_fuente)
+        self.code_textbox.bind('<Control-minus>', self.disminuir_fuente)
         
         # Outputs para analizadores, errores y ejecucion
         # Frame
@@ -121,6 +125,9 @@ class App(ctk.CTk):
         self.lexico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Lexico"), wrap='none')
         self.lexico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
         self.lexico_tab.configure(state="disabled")
+        
+        for i in range(0, len(tokens)):
+            self.lexico_tab.tag_config(tokens[i], foreground=colores[i])
         
         # Textbox de salida para Analisis Sintactico
         self.analisis_tabview.tab("Sintactico").grid_columnconfigure(0, weight=1)
@@ -258,8 +265,6 @@ class App(ctk.CTk):
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
-            
-            # Prueba de analisis lexico en apertura de archivo
             self.hilo_lexico(self)
 
     def guardar_archivo(self, *args):
@@ -269,7 +274,6 @@ class App(ctk.CTk):
                 file.write(content)
             self.estado_archivo = 2
             self.title(self.ruta_archivo)
-            # self.ruta_archivo = self.ruta_archivo
             self.actualizar_archivo_label()
 
     def guardar_como_archivo(self, *args):
@@ -296,18 +300,25 @@ class App(ctk.CTk):
             self.title(f"{self.nombre_archivo} *")
         else:
             self.title(f"{self.ruta_archivo} *")
-        self.actualizar_archivo_label()
         
-        # Borrar esto, solo prueba de rendimiento
-        # Funciona bien, pero obviamente al escribir mucho se traba
-        # esto significa que un analizador lexico por casos (linea o bloque)
-        # funcionara de forma optima
-        # self.guardar_archivo(self)
-        # self.hilo_lexico(self)
+        self.actualizar_archivo_label()
+        self.analizar_lexico_lite(self)
 
     def on_click(self, *args):
         self.actualizar_posicion_cursor()
-        
+    
+    def aumentar_fuente(self, event):
+        if self.editor_font_size < 16:
+            self.editor_font_size += 1
+            self.code_textbox.configure(font=("TkDefaultFont", self.editor_font_size))
+            self.line_textbox.configure(font=("TkDefaultFont", self.editor_font_size))
+
+    def disminuir_fuente(self, event):
+        if self.editor_font_size > 10:
+            self.editor_font_size -= 1
+            self.code_textbox.configure(font=("TkDefaultFont", self.editor_font_size))
+            self.line_textbox.configure(font=("TkDefaultFont", self.editor_font_size))
+    
     # Acciones a eventos
     def enlazar_scroll(self, *args):
         primera_posicion, *_ = self.code_textbox.yview()
@@ -398,6 +409,7 @@ class App(ctk.CTk):
         if not self.ruta_archivo:
             self.guardar_como_archivo(self)
         else:
+            self.guardar_archivo(self)
             self.hilo_lexico(self)
         
     def analizar_lexico(self, *args):
@@ -412,6 +424,16 @@ class App(ctk.CTk):
             time.sleep(0.1)
         
         self.mostrar_analisis_lexico(self)
+        self.style_code(self)
+    
+    def analizar_lexico_lite(self, *args):
+        codigo = self.code_textbox.get("1.0","end-1c")
+        self.analisis_lexico, self.comentarios = lexico_lite.analizador_lexico(codigo)
+        for token in tokens:
+            self.code_textbox.tag_delete(token)
+        
+        self.code_textbox.tag_delete('L')
+        self.code_textbox.tag_delete('M')
         self.style_code(self)
             
     def leer_analisis_lexico(self, *args):
@@ -466,7 +488,9 @@ class App(ctk.CTk):
             self.lexico_tab.delete("0.0", "end")
             self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
             for lexema in self.analisis_lexico:
-                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n")
+                token = tokens.index(lexema[1])
+                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n",
+                                       (lexema[1],colores[token]))
             self.lexico_tab.configure(state="disabled")
             
             self.errores_tab.configure(state="normal")
@@ -475,18 +499,6 @@ class App(ctk.CTk):
             self.errores_tab.configure(state="disabled")
     
     def style_code(self, *args):
-        colores = ['#e5c07b','#61afef','#d55fde','red','#00ad00',
-                   '#f6531c','#ffffff','#651a01','#7f848e']
-        # numeros               amarillo = '#e5c07b'
-        # identificadores       azul = '#61afef'
-        # palabras reservadas   rosa = '#d55fde'
-        # ops aritmeticos       rojo = 'red'
-        # ops relacionales      verde = '#00ad00'
-        # ops logicos           naranja = '#f6531c'
-        # simbolos              blanco = '#ffffff'
-        # asignacion            marron = '#651a01'
-        # comentarios           gris = '#7f848e'
-        
         for lexema in self.analisis_lexico:
             token = tokens.index(lexema[1])
             start_index = f"{lexema[3]}.{int(lexema[4])-1}"
@@ -495,11 +507,17 @@ class App(ctk.CTk):
             self.code_textbox.tag_config(lexema[1], foreground=colores[token])
             
         for comentario in self.comentarios:
-            # print(comentario)
             start_index = f"{comentario[1]}.{int(comentario[3])-1}"
             end_index = f"{comentario[2]}.{int(comentario[4])-1}"
             self.code_textbox.tag_add(comentario[0], start_index, end_index)
             self.code_textbox.tag_config(comentario[0], foreground=colores[8])
+    
+    def borrar_tags(self,*args):
+        for token in tokens:
+            self.code_textbox.tag_delete(token)
+        
+        self.code_textbox.tag_delete('L')
+        self.code_textbox.tag_delete('M')
 
 if __name__ == "__main__":
     app = App()

@@ -1,16 +1,12 @@
-import os
-import sys
 import re
 from matriz_transicion import matriz
 from tokens import *
-from tabulate import tabulate
 
 def analizador_lexico(codigo):
     codigo += '\n'
     buffer = ''
     lexema = ''
     analisis = []
-    errores = []
     comentarios = []
     fila_comentario = 0
     col_comentario = 1
@@ -118,14 +114,12 @@ def analizador_lexico(codigo):
             estado = 0
         elif estado == "e":
             col_archivo += 1
-            errores.append(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
             estado = 0
         elif estado == "E":
-            errores.append(f'Error en la linea {row_archivo}, columna {col_archivo - 1}')
             lexema = ''
             buffer = caracter
             estado = 0
-    return analisis, errores, comentarios
+    return analisis, comentarios
 
 def get_col(c):
     simbolos_p1 = [".","_","!","<",">","=","/","*"]
@@ -158,65 +152,3 @@ def get_col(c):
     if re.search("\t",c):
         return 24
     return 25
-
-def escribir_archivos(tabla_analisis, errores, comentarios):
-    parent_directory = os.path.dirname(__file__)
-    dirname = 'analisis_lexico'
-    abs_dir = os.path.join(parent_directory,dirname)
-    filenames = ['analisis.txt','errores.txt','comentarios.txt']
-
-    if os.path.isdir(abs_dir):
-        abs_path = os.path.join(abs_dir,filenames[0])
-        with open(abs_path, "w") as archivo:
-            archivo.write(tabla_analisis)
-            
-        abs_path = os.path.join(abs_dir,filenames[1])
-        with open(abs_path, "w") as archivo:
-            for error in errores:
-                archivo.write(f'{error}\n')
-        
-        abs_path = os.path.join(abs_dir,filenames[2])
-        with open(abs_path, "w") as archivo:
-            archivo.write(comentarios)
-        
-    else:
-        try:
-            os.mkdir(abs_dir)
-            abs_path = os.path.join(abs_dir,filenames[0])
-            with open(abs_path, "w") as archivo:
-                archivo.write(tabla_analisis)
-                
-            abs_path = os.path.join(abs_dir,filenames[1])
-            with open(abs_path, "w") as archivo:
-                for error in errores:
-                    archivo.write(f'{error}\n')
-            
-            os.mkdir(abs_dir)
-            abs_path = os.path.join(abs_dir,filenames[2])
-            with open(abs_path, "w") as archivo:
-                archivo.write(comentarios)
-        except:
-            print(f'Error al trabajar en el directorio: {abs_dir}')
-            pass
-
-def leer_archivo(filepath):
-    codigo = ''
-    if os.path.exists(filepath):
-        with open(filepath, "r") as archivo:
-            codigo = archivo.read()
-    else:
-        print("El archivo no existe")
-    
-    return codigo
-
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print('Falta el archivo fuente')
-    elif len(sys.argv) == 2:
-        archivo = sys.argv[1]
-        codigo = leer_archivo(archivo)
-        analisis, errores, comentarios = analizador_lexico(codigo)
-        encabezados = ["Lexema", "Token", "Subtoken"]
-        tabla_analisis = tabulate(analisis, tablefmt="plain")
-        tabla_comentarios = tabulate(comentarios, tablefmt="plain")
-        escribir_archivos(tabla_analisis,errores,tabla_comentarios)
