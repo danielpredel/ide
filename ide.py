@@ -251,14 +251,6 @@ class App(ctk.CTk):
                 self.code_textbox.delete("1.0", tk.END)
                 self.code_textbox.insert(tk.END, content)
                 
-                # Borrar esto solo prueba
-                # self.code_textbox.configure(state="normal")
-                # start_index = "2.5"
-                # end_index = "2.6"
-                # self.code_textbox.tag_add("PRUEBA", start_index, end_index)
-                # self.code_textbox.tag_config("PRUEBA", foreground="red")
-                
-                
             self.title(self.ruta_archivo)
             self.estado_archivo = 2
             self.nombre_archivo = os.path.basename(self.ruta_archivo)
@@ -311,7 +303,6 @@ class App(ctk.CTk):
         # funcionara de forma optima
         # self.guardar_archivo(self)
         # self.hilo_lexico(self)
-        
 
     def on_click(self, *args):
         self.actualizar_posicion_cursor()
@@ -409,7 +400,6 @@ class App(ctk.CTk):
             self.hilo_lexico(self)
         
     def analizar_lexico(self, *args):
-        # proceso = subprocess.run(["python", "lexico.py", "nada"], capture_output=True)
         proceso = subprocess.run(["python", "lexico.py", self.ruta_archivo], capture_output=True)
         self.resultado_lexico = proceso.stdout.decode("utf-8")
     
@@ -489,19 +479,18 @@ class App(ctk.CTk):
             self.errores_tab.configure(state="disabled")
     
     def style_code(self, *args):
-        colores = ['#e5c07b','#61afef','#d55fde','#ef596f','#78f536',
-                   '#2bbac5','#ffffff','#ef596f','#7f848e']
+        colores = ['#e5c07b','#61afef','#d55fde','red','#00ad00',
+                   '#f6531c','#ffffff','#651a01','#7f848e']
         # numeros               amarillo = '#e5c07b'
         # identificadores       azul = '#61afef'
         # palabras reservadas   rosa = '#d55fde'
-        # ops aritmeticos       rojo = '#ef596f'
-        # ops relacionales      verde = '#78f536'
-        # ops logicos           azul_claro = '#2bbac5'
+        # ops aritmeticos       rojo = 'red'
+        # ops relacionales      verde = '#00ad00'
+        # ops logicos           naranja = '#f6531c'
         # simbolos              blanco = '#ffffff'
-        # asignacion            rojo = '#ef596f'
+        # asignacion            marron = '#651a01'
         # comentarios           gris = '#7f848e'
         
-        # self.code_textbox.configure(state="normal")
         for lexema in self.analisis_lexico:
             token = tokens.index(lexema[1])
             start_index = f"{lexema[3]}.{int(lexema[4])-1}"
@@ -509,9 +498,6 @@ class App(ctk.CTk):
             self.code_textbox.tag_add(lexema[1], start_index, end_index)
             self.code_textbox.tag_config(lexema[1], foreground=colores[token])
         
-        
-        
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()

@@ -72,6 +72,10 @@ def analizador_lexico(codigo):
             elif row == 8:
                 analisis.append([lexema,tokens[4],sub_tokens[24],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             # Aqui van los casos para los comentarios 10 y 12 (color)
+            elif row == 10:
+                print()
+            elif row == 12:
+                print()
             elif row == 13:
                 analisis.append([lexema,tokens[3],sub_tokens[34],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             col_archivo += 1
