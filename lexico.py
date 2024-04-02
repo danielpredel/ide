@@ -191,7 +191,6 @@ def escribir_archivos(tabla_analisis, errores, comentarios):
                 for error in errores:
                     archivo.write(f'{error}\n')
             
-            os.mkdir(abs_dir)
             abs_path = os.path.join(abs_dir,filenames[2])
             with open(abs_path, "w") as archivo:
                 archivo.write(comentarios)
@@ -209,6 +208,13 @@ def leer_archivo(filepath):
     
     return codigo
 
+def ejecutar_lexico(codigo):
+    analisis, errores, comentarios = analizador_lexico(codigo)
+    tabla_analisis = tabulate(analisis, tablefmt="plain")
+    tabla_comentarios = tabulate(comentarios, tablefmt="plain")
+    escribir_archivos(tabla_analisis,errores,tabla_comentarios)
+    return analisis, errores, comentarios
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print('Falta el archivo fuente')
@@ -216,7 +222,6 @@ if __name__ == "__main__":
         archivo = sys.argv[1]
         codigo = leer_archivo(archivo)
         analisis, errores, comentarios = analizador_lexico(codigo)
-        encabezados = ["Lexema", "Token", "Subtoken"]
         tabla_analisis = tabulate(analisis, tablefmt="plain")
         tabla_comentarios = tabulate(comentarios, tablefmt="plain")
         escribir_archivos(tabla_analisis,errores,tabla_comentarios)

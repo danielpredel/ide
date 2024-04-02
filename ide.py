@@ -3,12 +3,10 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog
 from PIL import Image
-import subprocess
-from threading import Thread
-import time
 from tokens import tokens
 from colores_token import colores
 import lexico_lite
+import lexico
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -19,9 +17,9 @@ class App(ctk.CTk):
     icons = ["open_file.png","close_file.png","new_file.png","save_file.png","save_as_file.png","build.png","run.png"]
     icons_dirname = "icons"
     icon_images = []
-    resultado_lexico = ''
     analisis_lexico = []
     comentarios = []
+    errores = []
     editor_font_size = 15
     
     # Estado del archivo:
@@ -265,7 +263,7 @@ class App(ctk.CTk):
             self.actualizar_archivo_label()
             self.actualizar_lineas()
             self.actualizar_posicion_cursor()
-            self.hilo_lexico(self)
+            self.analizar_lexico(self)
 
     def guardar_archivo(self, *args):
         if self.ruta_archivo:
@@ -406,23 +404,15 @@ class App(ctk.CTk):
                 self.cerrar_archivo(self)
 
     def build_file(self, *args):
-        if not self.ruta_archivo:
-            self.guardar_como_archivo(self)
-        else:
-            self.guardar_archivo(self)
-            self.hilo_lexico(self)
+        self.analizar_lexico(self)
         
     def analizar_lexico(self, *args):
-        proceso = subprocess.run(["python", "lexico.py", self.ruta_archivo], capture_output=True)
-        self.resultado_lexico = proceso.stdout.decode("utf-8")
+        codigo = self.code_textbox.get("1.0","end-1c")
+        self.analisis_lexico, self.errores, self.comentarios = lexico.ejecutar_lexico(codigo)
+        self.mostrar_analisis_lexico(self)
+        self.style_code(self)
     
     def hilo_lexico(self, *args):
-        hilo = Thread(target=self.analizar_lexico)
-        hilo.start()
-
-        while hilo.is_alive():
-            time.sleep(0.1)
-        
         self.mostrar_analisis_lexico(self)
         self.style_code(self)
     
@@ -435,68 +425,22 @@ class App(ctk.CTk):
         self.code_textbox.tag_delete('L')
         self.code_textbox.tag_delete('M')
         self.style_code(self)
-            
-    def leer_analisis_lexico(self, *args):
-        analisis = []
-        dirname = 'analisis_lexico'
-        filename = 'analisis.txt'
-        abs_path = os.path.join(dirname,filename)
-        if os.path.exists(abs_path):
-            with open(abs_path, "r") as archivo:
-                lineas = archivo.readlines()
-            for linea in lineas:
-                lexema = linea.split()
-                analisis.append(lexema)    
-        else:
-            print(f"El archivo {abs_path} no existe")
-        
-        errores = ''
-        dirname = 'analisis_lexico'
-        filename = 'errores.txt'
-        abs_path = os.path.join(dirname,filename)
-        if os.path.exists(abs_path):
-            with open(abs_path, "r") as archivo:
-                errores = archivo.read()   
-        else:
-            print(f"El archivo {abs_path} no existe")
-            
-        # 
-        comentarios = []
-        dirname = 'analisis_lexico'
-        filename = 'comentarios.txt'
-        abs_path = os.path.join(dirname,filename)
-        if os.path.exists(abs_path):
-            with open(abs_path, "r") as archivo:
-                lineas = archivo.readlines()
-            for linea in lineas:
-                comentario = linea.split()
-                comentarios.append(comentario)
-        else:
-            print(f"El archivo {abs_path} no existe")
-        
-        return analisis, errores, comentarios
-     
+    
     def mostrar_analisis_lexico(self, *args):
-        if self.resultado_lexico:
-            self.errores_tab.configure(state="normal")
-            self.errores_tab.delete("0.0", "end")
-            self.errores_tab.insert("0.0", f"{self.resultado_lexico}")
-            self.errores_tab.configure(state="disabled")
-        else:
-            self.analisis_lexico, errores, self.comentarios = self.leer_analisis_lexico(self)
-            self.lexico_tab.configure(state="normal")
-            self.lexico_tab.delete("0.0", "end")
-            self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
-            for lexema in self.analisis_lexico:
-                token = tokens.index(lexema[1])
-                self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n",
-                                       (lexema[1],colores[token]))
-            self.lexico_tab.configure(state="disabled")
-            
-            self.errores_tab.configure(state="normal")
-            self.errores_tab.delete("0.0", "end")
-            self.errores_tab.insert("0.0", f"{errores}")
-            self.errores_tab.configure(state="disabled")
+        self.lexico_tab.configure(state="normal")
+        self.lexico_tab.delete("0.0", "end")
+        self.lexico_tab.insert("end", "LEXEMA\t\tTOKEN\t\t\tSUBTOKEN\t\t\tFILA\tCOL_I\tCOL_F\n")
+        for lexema in self.analisis_lexico:
+            token = tokens.index(lexema[1])
+            self.lexico_tab.insert("end", f"{lexema[0]}\t\t{lexema[1]}\t\t\t{lexema[2]}\t\t\t{lexema[3]}\t{lexema[4]}\t{lexema[5]}\n",
+                                    (lexema[1],colores[token]))
+        self.lexico_tab.configure(state="disabled")
+        
+        self.errores_tab.configure(state="normal")
+        self.errores_tab.delete("0.0", "end")
+        for error in self.errores:
+            self.errores_tab.insert("end", f"{error}\n")
+        self.errores_tab.configure(state="disabled")
     
     def style_code(self, *args):
         for lexema in self.analisis_lexico:
