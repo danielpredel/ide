@@ -5,7 +5,6 @@ from tkinter import filedialog
 from PIL import Image
 from tokens import tokens
 from colores_token import colores
-import lexico_lite
 import lexico
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -418,7 +417,7 @@ class App(ctk.CTk):
     
     def analizar_lexico_lite(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
-        self.analisis_lexico, self.comentarios = lexico_lite.analizador_lexico(codigo)
+        self.analisis_lexico, _, self.comentarios = lexico.analizador_lexico(codigo)
         for token in tokens:
             self.code_textbox.tag_delete(token)
         
