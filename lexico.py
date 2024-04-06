@@ -212,6 +212,6 @@ if __name__ == "__main__":
     elif len(sys.argv) == 2:
         archivo = sys.argv[1]
         codigo = leer_archivo(archivo)
-        analisis, errores, comentarios = analizador_lexico(codigo)
+        analisis, errores, _ = analizador_lexico(codigo)
         tabla_analisis = tabulate(analisis, tablefmt="plain")
         escribir_archivos(tabla_analisis,errores)
