@@ -135,7 +135,7 @@ def get_col(c):
     if cod_ascii >= 48 and cod_ascii <= 57:
         return 0
     
-    if c.isalpha():
+    if (cod_ascii >= 65 and cod_ascii <= 90) or (cod_ascii >= 97 and cod_ascii <= 122):
         return 1
     
     try:
@@ -159,7 +159,7 @@ def get_col(c):
         return 24
     return 25
 
-def escribir_archivos(tabla_analisis, errores, comentarios):
+def escribir_archivos(tabla_analisis, errores):
     parent_directory = os.path.dirname(__file__)
     dirname = 'analisis_lexico'
     abs_dir = os.path.join(parent_directory,dirname)
@@ -175,10 +175,6 @@ def escribir_archivos(tabla_analisis, errores, comentarios):
             for error in errores:
                 archivo.write(f'{error}\n')
         
-        abs_path = os.path.join(abs_dir,filenames[2])
-        with open(abs_path, "w") as archivo:
-            archivo.write(comentarios)
-        
     else:
         try:
             os.mkdir(abs_dir)
@@ -190,10 +186,6 @@ def escribir_archivos(tabla_analisis, errores, comentarios):
             with open(abs_path, "w") as archivo:
                 for error in errores:
                     archivo.write(f'{error}\n')
-            
-            abs_path = os.path.join(abs_dir,filenames[2])
-            with open(abs_path, "w") as archivo:
-                archivo.write(comentarios)
         except:
             print(f'Error al trabajar en el directorio: {abs_dir}')
             pass
@@ -211,8 +203,7 @@ def leer_archivo(filepath):
 def ejecutar_lexico(codigo):
     analisis, errores, comentarios = analizador_lexico(codigo)
     tabla_analisis = tabulate(analisis, tablefmt="plain")
-    tabla_comentarios = tabulate(comentarios, tablefmt="plain")
-    escribir_archivos(tabla_analisis,errores,tabla_comentarios)
+    escribir_archivos(tabla_analisis,errores)
     return analisis, errores, comentarios
 
 if __name__ == "__main__":
@@ -224,4 +215,4 @@ if __name__ == "__main__":
         analisis, errores, comentarios = analizador_lexico(codigo)
         tabla_analisis = tabulate(analisis, tablefmt="plain")
         tabla_comentarios = tabulate(comentarios, tablefmt="plain")
-        escribir_archivos(tabla_analisis,errores,tabla_comentarios)
+        escribir_archivos(tabla_analisis,errores)

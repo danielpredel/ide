@@ -411,10 +411,6 @@ class App(ctk.CTk):
         self.mostrar_analisis_lexico(self)
         self.style_code(self)
     
-    def hilo_lexico(self, *args):
-        self.mostrar_analisis_lexico(self)
-        self.style_code(self)
-    
     def analizar_lexico_lite(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
         self.analisis_lexico, _, self.comentarios = lexico.analizador_lexico(codigo)
