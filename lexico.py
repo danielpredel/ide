@@ -214,5 +214,4 @@ if __name__ == "__main__":
         codigo = leer_archivo(archivo)
         analisis, errores, comentarios = analizador_lexico(codigo)
         tabla_analisis = tabulate(analisis, tablefmt="plain")
-        tabla_comentarios = tabulate(comentarios, tablefmt="plain")
         escribir_archivos(tabla_analisis,errores)
