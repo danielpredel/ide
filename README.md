@@ -24,7 +24,7 @@
 
 **(Windows):**
 
-*.\env\bin\activate*
+*.\env\Scripts\activate*
 
 4.- **Instalar dependencias:**
 
