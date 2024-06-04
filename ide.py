@@ -132,9 +132,11 @@ class App(ctk.CTk):
         # Textbox de salida para Analisis Sintactico
         self.analisis_tabview.tab("Sintactico").grid_columnconfigure(0, weight=1)
         self.analisis_tabview.tab("Sintactico").grid_rowconfigure(0, weight=1)
-        self.sintactico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Sintactico"), wrap='word')
-        self.sintactico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.sintactico_tab.configure(state="disabled")
+        self.tree_button = ctk.CTkButton(self.analisis_tabview.tab("Sintactico"), text='Mostrar Arbol Sintactico', width=40, command= lambda: self.mostrar_analisis_sintactico())
+        self.tree_button.grid(row=0, column=0, padx=5, pady=10)
+        # self.sintactico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Sintactico"), wrap='word')
+        # self.sintactico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        # self.sintactico_tab.configure(state="disabled")
         
         # Textbox de salida para Analisis Semantico
         self.analisis_tabview.tab("Semantico").grid_columnconfigure(0, weight=1)
@@ -468,6 +470,9 @@ class App(ctk.CTk):
         self.arbol_sintactico = parser.analisis_sintactico()
         if self.arbol_sintactico != None:
             parser.tree_to_json(self.arbol_sintactico)
+    
+    def mostrar_analisis_sintactico(self, *args):
+        print('sin')
     
 if __name__ == "__main__":
     app = App()
