@@ -38,7 +38,7 @@ public class Tree {
             expandAllNodes(tree, 0, tree.getRowCount());
 
             // Crear y configurar la ventana
-            JFrame frame = new JFrame("JSON to JTree Example");
+            JFrame frame = new JFrame("Arbol Sintactico");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.add(new JScrollPane(tree));
             frame.setSize(800, 600);
