@@ -354,7 +354,12 @@ class AnalizadorSintactico:
         self.tree_to_json(root)
         
     def tree_to_json(self,root):
-        diccionario = root.to_dict()
+        # Agregar root y array
+        diccionario = {
+            "name": "root",
+            "root": [root.to_dict()]
+        }
+        
         json_tree = json.dumps(diccionario, indent=2)
         self.escribir_json(json_tree)
 
