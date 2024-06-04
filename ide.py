@@ -7,6 +7,8 @@ from tokens import tokens
 from colores_token import colores
 import lexico
 from sintactico import AnalizadorSintactico
+import subprocess
+import threading
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -472,7 +474,31 @@ class App(ctk.CTk):
             parser.tree_to_json(self.arbol_sintactico)
     
     def mostrar_analisis_sintactico(self, *args):
-        print('sin')
+        self.errores_tab.configure(state="normal")
+        
+        # Analizar la existencia de los archivos necesarios: 
+        if os.path.exists(os.path.join('analisis_sintactico','tree.json')):
+            if os.path.exists('Tree.class'):
+                # Compilar Tree.java: javac -cp json-20240303.jar Tree.java
+                if os.path.exists('json-20240303.jar'):
+                    subproceso_java = threading.Thread(target=self.java_window)
+                    # Iniciar el subproceso
+                    subproceso_java.start()
+                    
+                else:
+                    self.errores_tab.insert("end", f"No existe el archivo {'json-20240303.jar'}\n")
+            else:
+                self.errores_tab.insert("end", f"No existe el archivo {'Tree.class'}\n")
+        else:
+            self.errores_tab.insert("end", f"No existe el archivo {os.path.join('analisis_sintactico','tree.json')}\n")
+        
+        self.errores_tab.configure(state="disabled")
+    
+    def java_window(self, *args):
+        if os.name == 'posix':
+            subprocess.run(["java", "-cp",".:json-20240303.jar","Tree"])
+        elif os.name == 'nt':
+            subprocess.run(["java", "-cp",".;json-20240303.jar","Tree"])
     
 if __name__ == "__main__":
     app = App()
