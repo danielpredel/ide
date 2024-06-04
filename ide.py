@@ -6,6 +6,7 @@ from PIL import Image
 from tokens import tokens
 from colores_token import colores
 import lexico
+from sintactico import AnalizadorSintactico
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -27,6 +28,8 @@ class App(ctk.CTk):
     # 2 - guardado
     estado_archivo = 0
     saltar_advertencia = False
+    
+    arbol_sintactico = None
     
     def __init__(self):
         super().__init__()
@@ -404,6 +407,7 @@ class App(ctk.CTk):
 
     def build_file(self, *args):
         self.analizar_lexico(self)
+        self.analizar_sintactico(self)
         
     def analizar_lexico(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
@@ -411,6 +415,7 @@ class App(ctk.CTk):
         self.mostrar_analisis_lexico(self)
         self.style_code(self)
     
+    # Analizador lexico usado al dar color a los tokens
     def analizar_lexico_lite(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
         self.analisis_lexico, _, self.comentarios = lexico.analizador_lexico(codigo)
@@ -458,6 +463,12 @@ class App(ctk.CTk):
         self.code_textbox.tag_delete('L')
         self.code_textbox.tag_delete('M')
 
+    def analizar_sintactico(self, *args):
+        parser = AnalizadorSintactico(self.analisis_lexico)
+        self.arbol_sintactico = parser.analisis_sintactico()
+        if self.arbol_sintactico != None:
+            parser.tree_to_json(self.arbol_sintactico)
+    
 if __name__ == "__main__":
     app = App()
     app.mainloop()
