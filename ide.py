@@ -458,7 +458,7 @@ class App(ctk.CTk):
             start_index = f"{comentario[1]}.{int(comentario[3])-1}"
             end_index = f"{comentario[2]}.{int(comentario[4])-1}"
             self.code_textbox.tag_add(comentario[0], start_index, end_index)
-            self.code_textbox.tag_config(comentario[0], foreground=colores[8])
+            self.code_textbox.tag_config(comentario[0], foreground=colores[10])
     
     def borrar_tags(self,*args):
         for token in tokens:

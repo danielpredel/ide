@@ -6,6 +6,8 @@
 # 5     OP_LOGICO
 # 6     SIMBOLO
 # 7     ASIGNACION
+# 8     INCREMENTO
+# 9     DECREMENTO
 tokens = ["NUMERO",
           "IDENTIFICADOR",
           "PALABRA_RESERVADA",
@@ -13,7 +15,10 @@ tokens = ["NUMERO",
           "OP_RELACIONAL",
           "OP_LOGICO",
           "SIMBOLO",
-          "ASIGNACION"]
+          "ASIGNACION",
+          "INCREMENTO",
+          "DECREMENTO",
+          "COMENTARIO"]
 
 # 0     ENTERO
 # 1     REAL
@@ -51,6 +56,8 @@ tokens = ["NUMERO",
 # 33    INCREMENTO
 # 34    DECREMENTO
 # 35    END
+# 36    ENTERO_NEG
+# 37    REAL_NEG
 
 sub_tokens = ["ENTERO","REAL","IF","ELSE","DO",
               "WHILE","SWITCH","CASE","INTEGER","DOUBLE",
@@ -58,6 +65,7 @@ sub_tokens = ["ENTERO","REAL","IF","ELSE","DO",
               "MULTIPLICACION","DIVISION","MODULO","POTENCIA","MENOR",
               "MENOR_IGUAL","MAYOR","MAYOR_IGUAL","DIFERENTE","IGUAL",
               "AND","OR","PARENTESIS_I","PARENTESIS_D","LLAVE_I",
-              "LLAVE_D","COMA","PUNTO_Y_COMA","INCREMENTO","DECREMENTO", "END"]
+              "LLAVE_D","COMA","PUNTO_Y_COMA","INCREMENTO","DECREMENTO",
+              "END","ENTERO_NEG","REAL_NEG"]
 
 palabras_reservadas = ["if","else","do","while","switch","case","integer","double","main","cin","cout", "end"]
