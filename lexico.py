@@ -74,7 +74,7 @@ def analizador_lexico(codigo):
                 if col == 22:
                     analisis.append([lexema,tokens[5],sub_tokens[26],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 1:
-                analisis.append([lexema,tokens[3],sub_tokens[33],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                analisis.append([lexema,tokens[8],sub_tokens[33],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 7:
                 analisis.append([lexema,tokens[4],sub_tokens[23],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 8:
@@ -86,7 +86,7 @@ def analizador_lexico(codigo):
             elif row == 12:
                 comentarios.append(['M',fila_comentario,row_archivo,col_comentario,col_archivo+1])
             elif row == 13:
-                analisis.append([lexema,tokens[3],sub_tokens[34],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                analisis.append([lexema,tokens[9],sub_tokens[34],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             col_archivo += 1
             lexema = ''
             estado = 0
@@ -95,9 +95,52 @@ def analizador_lexico(codigo):
             if row == 1:
                 analisis.append([lexema,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 2:
-                analisis.append([lexema,tokens[0],sub_tokens[0],row_archivo,col_archivo-len(lexema),col_archivo])
+                if analisis == []:
+                    token_anterior = 'VACIO'
+                else:
+                    lexema_anterior = analisis[-1]
+                    token_anterior = lexema_anterior[2]
+                    linea_anterior = lexema_anterior[3]
+                    if token_anterior in ["ENTERO","REAL","ENTERO_NEG","REAL_NEG"]:
+                        token_anterior = "NUMERO"
+                # Descomentar y formar elif para considerar enteros con +
+                # if '+' in lexema:
+                #     signo = lexema[:1]
+                #     numero = lexema[1:]
+                #     analisis.append([signo,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
+                #     analisis.append([numero,tokens[0],sub_tokens[0],row_archivo,col_archivo-len(lexema)+1,col_archivo])
+                # el
+                if token_anterior in ["SUMA","RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                    signo = lexema[:1]
+                    numero = lexema[1:]
+                    analisis.append([signo,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
+                    analisis.append([numero,tokens[0],sub_tokens[0],row_archivo,col_archivo-len(lexema)+1,col_archivo])
+                else:
+                    analisis.append([lexema,tokens[0],sub_tokens[36],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 4:
-                analisis.append([lexema,tokens[0],sub_tokens[1],row_archivo,col_archivo-len(lexema),col_archivo])
+                if analisis == []:
+                    token_anterior = 'VACIO'
+                else:
+                    # token_anterior = analisis[-1][2]
+                    lexema_anterior = analisis[-1]
+                    token_anterior = lexema_anterior[2]
+                    linea_anterior = lexema_anterior[3]
+                    if token_anterior in ["ENTERO","REAL","ENTERO_NEG","REAL_NEG"]:
+                        token_anterior = "NUMERO"
+                # Descomentar y formar elif para considerar reales con +
+                # if '+' in lexema:
+                #     signo = lexema[:1]
+                #     numero = lexema[1:]
+                #     analisis.append([signo,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
+                #     analisis.append([numero,tokens[0],sub_tokens[1],row_archivo,col_archivo-len(lexema)+1,col_archivo])
+                # el
+                if token_anterior in ["SUMA", "RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                    signo = lexema[:1]
+                    numero = lexema[1:]
+                    analisis.append([signo,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
+                    analisis.append([numero,tokens[0],sub_tokens[1],row_archivo,col_archivo-len(lexema)+1,col_archivo])
+                else:
+                    analisis.append([lexema,tokens[0],sub_tokens[37],row_archivo,col_archivo-len(lexema),col_archivo])
             elif row == 5:
                 if lexema in palabras_reservadas:
                     analisis.append([lexema,tokens[2],lexema.upper(),row_archivo,col_archivo-len(lexema),col_archivo])
