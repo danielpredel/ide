@@ -110,7 +110,8 @@ def analizador_lexico(codigo):
                 #     analisis.append([signo,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
                 #     analisis.append([numero,tokens[0],sub_tokens[0],row_archivo,col_archivo-len(lexema)+1,col_archivo])
                 # el
-                if token_anterior in ["SUMA","RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                # if token_anterior in ["SUMA","RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                if token_anterior in ["SUMA","RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema:
                     signo = lexema[:1]
                     numero = lexema[1:]
                     analisis.append([signo,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
@@ -134,7 +135,8 @@ def analizador_lexico(codigo):
                 #     analisis.append([signo,tokens[3],sub_tokens[13],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
                 #     analisis.append([numero,tokens[0],sub_tokens[1],row_archivo,col_archivo-len(lexema)+1,col_archivo])
                 # el
-                if token_anterior in ["SUMA", "RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                # if token_anterior in ["SUMA", "RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema and linea_anterior == row_archivo:
+                if token_anterior in ["SUMA", "RESTA","IDENTIFICADOR","NUMERO"] and '-' in lexema:
                     signo = lexema[:1]
                     numero = lexema[1:]
                     analisis.append([signo,tokens[3],sub_tokens[14],row_archivo,col_archivo-len(lexema),col_archivo-len(lexema)+1])
