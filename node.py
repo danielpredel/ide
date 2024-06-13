@@ -7,11 +7,14 @@ class Node:
         self.lineno = None
         
         # node_kind:
-        # 0 (Tipos de Nodo): EXPRESION | SENTENCIA
-        # 1 (Tipos de exp):  OP | CONST | IDENTIFICADOR
-        # 1 (Tipos de sent): SELECCION | ITERACION | REPETICION | IN | OUT
+        # 0 (Tipos de Nodo): MAIN | EXPRESION | SENTENCIA | DECLARACION
+        # 1 (Tipos de exp):  OPERADOR | CONSTANTE | IDENTIFICADOR
+        # 1 (Tipos de sent): SELECCION | ITERACION | REPETICION | IN | OUT | ASIGNACION
+        # 1 (Tipos de dec):  INTEGER | DOUBLE
         self.node_kind = [None, None]
         
+        # Lexema
+        # Datos a mostrar en el arbol
         self.name = None
         self.op = None
         self.val = None

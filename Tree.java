@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.File;
 
+// Compilar Tree.java: javac -cp json-20240303.jar Tree.java
+
 public class Tree {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -23,10 +25,11 @@ public class Tree {
             }
 
             // Crear el nodo raíz del árbol
-            DefaultMutableTreeNode root = new DefaultMutableTreeNode(jsonObject.getString("name"));
+            DefaultMutableTreeNode root = new DefaultMutableTreeNode(" ");
 
             // Construir el árbol desde el objeto JSON
-            buildTreeFromJsonArray(jsonObject.getJSONArray("root"), root);
+            // buildTreeFromJsonArray(jsonObject.getJSONObject("main"), root);
+            buildTreeFromJsonArray(jsonObject.getJSONArray("main"), root);
 
             // Crear el modelo de árbol
             DefaultTreeModel treeModel = new DefaultTreeModel(root);

@@ -100,7 +100,7 @@ def analizador_lexico(codigo):
                 else:
                     lexema_anterior = analisis[-1]
                     token_anterior = lexema_anterior[2]
-                    linea_anterior = lexema_anterior[3]
+                    # linea_anterior = lexema_anterior[3]
                     if token_anterior in ["ENTERO","REAL","ENTERO_NEG","REAL_NEG"]:
                         token_anterior = "NUMERO"
                 # Descomentar y formar elif para considerar enteros con +
@@ -125,7 +125,7 @@ def analizador_lexico(codigo):
                     # token_anterior = analisis[-1][2]
                     lexema_anterior = analisis[-1]
                     token_anterior = lexema_anterior[2]
-                    linea_anterior = lexema_anterior[3]
+                    # linea_anterior = lexema_anterior[3]
                     if token_anterior in ["ENTERO","REAL","ENTERO_NEG","REAL_NEG"]:
                         token_anterior = "NUMERO"
                 # Descomentar y formar elif para considerar reales con +

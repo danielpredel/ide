@@ -68,4 +68,4 @@ sub_tokens = ["ENTERO","REAL","IF","ELSE","DO",
               "LLAVE_D","COMA","PUNTO_Y_COMA","INCREMENTO","DECREMENTO",
               "END","ENTERO_NEG","REAL_NEG"]
 
-palabras_reservadas = ["if","else","do","while","switch","case","integer","double","main","cin","cout", "end"]
+palabras_reservadas = ["if","else","do","while","switch","case","integer","double","main","cin","cout"]
