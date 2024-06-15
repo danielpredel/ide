@@ -53,12 +53,13 @@ class AnalizadorSintactico:
             return 'ENDFILE'
         
     def error(self):
-        print(f'\n>>> Error en linea {self.lineno}: token {self.token} -> {self.lexema}')
-        # exit()
+        error = f'\n>>> Error en linea {self.lineno}: token {self.token} -> {self.lexema}'
+        # print(error)
+        self.errores.append(error)
     
     def error_sintaxis(self, mensaje):
         error = f'\n>>> Error de sintaxis en la linea {self.lineno}: {mensaje}'
-        print(error)
+        # print(error)
         self.errores.append(error)
 
     def nuevo_nodo_main(self):
@@ -214,7 +215,19 @@ class AnalizadorSintactico:
         elif self.token == 'COUT':
             t = self.sent_out()
         elif self.token == 'IDENTIFICADOR':
-            t = self.asignacion()
+            lookahead = self.get_lookahead()
+            if lookahead == 'INCREMENTO':
+                t = self.nuevo_nodo_inc_dec(0)
+                self.match('IDENTIFICADOR')
+                self.match('INCREMENTO')
+                self.match('PUNTO_Y_COMA')
+            elif lookahead == 'DECREMENTO':
+                t = self.nuevo_nodo_inc_dec(1)
+                self.match('IDENTIFICADOR')
+                self.match('DECREMENTO')
+                self.match('PUNTO_Y_COMA')
+            else:
+                t = self.asignacion()
         else:
             self.error_sintaxis(f'Token inesperado {self.token}: {self.lexema}')
             self.token = self.get_token()
@@ -362,6 +375,50 @@ class AnalizadorSintactico:
                 p.child[1] = self.componente()
         return t
     
+    # def componente(self):
+    #     t = None
+    #     if self.token == 'PARENTESIS_I':
+    #         self.match('PARENTESIS_I')
+    #         t = self.expresion()
+    #         self.match('PARENTESIS_D')
+    #     elif self.token == 'ENTERO':
+    #         t = self.nuevo_nodo_exp(1)
+    #         if t != None and self.token == 'ENTERO':
+    #             t.val = int(self.lexema)
+    #         self.match('ENTERO')
+    #     elif self.token == 'REAL':
+    #         t = self.nuevo_nodo_exp(1)
+    #         if t != None and self.token == 'REAL':
+    #             t.val = float(self.lexema)
+    #         self.match('REAL')
+    #     elif self.token == 'ENTERO_NEG':
+    #         t = self.nuevo_nodo_exp(1)
+    #         if t != None and self.token == 'ENTERO_NEG':
+    #             t.val = int(self.lexema)
+    #         self.match('ENTERO_NEG')
+    #     elif self.token == 'REAL_NEG':
+    #         t = self.nuevo_nodo_exp(1)
+    #         if t != None and self.token == 'REAL_NEG':
+    #             t.val = float(self.lexema)
+    #         self.match('REAL_NEG')
+    #     elif self.token == 'IDENTIFICADOR':
+    #         lookahead = self.get_lookahead()
+    #         if lookahead == 'INCREMENTO':
+    #             t = self.nuevo_nodo_inc_dec(0)
+    #             self.match('IDENTIFICADOR')
+    #             self.match('INCREMENTO')
+    #         elif lookahead == 'DECREMENTO':
+    #             t = self.nuevo_nodo_inc_dec(1)
+    #             self.match('IDENTIFICADOR')
+    #             self.match('DECREMENTO')
+    #         else:
+    #             t = self.nuevo_nodo_exp(2)
+    #             self.match('IDENTIFICADOR')
+    #     else:
+    #         self.error_sintaxis(f'Token inesperado {self.token}: {self.lexema}')
+    #         self.token = self.get_token()
+    #     return t
+    
     def componente(self):
         t = None
         if self.token == 'PARENTESIS_I':
@@ -388,24 +445,15 @@ class AnalizadorSintactico:
             if t != None and self.token == 'REAL_NEG':
                 t.val = float(self.lexema)
             self.match('REAL_NEG')
+        # Separar inc_dec
         elif self.token == 'IDENTIFICADOR':
-            lookahead = self.get_lookahead()
-            if lookahead == 'INCREMENTO':
-                t = self.nuevo_nodo_inc_dec(0)
-                self.match('IDENTIFICADOR')
-                self.match('INCREMENTO')
-            elif lookahead == 'DECREMENTO':
-                t = self.nuevo_nodo_inc_dec(1)
-                self.match('IDENTIFICADOR')
-                self.match('DECREMENTO')
-            else:
-                t = self.nuevo_nodo_exp(2)
-                self.match('IDENTIFICADOR')
+            t = self.nuevo_nodo_exp(2)
+            self.match('IDENTIFICADOR')
         else:
             self.error_sintaxis(f'Token inesperado {self.token}: {self.lexema}')
             self.token = self.get_token()
         return t
-    
+       
     def analisis_sintactico(self):
         return self.programa()
         
@@ -438,3 +486,6 @@ class AnalizadorSintactico:
             except:
                 print(f'Error al trabajar en el directorio: {abs_dir}')
                 pass
+    
+    def get_errores(self):
+        return self.errores

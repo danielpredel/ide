@@ -472,10 +472,14 @@ class App(ctk.CTk):
         self.arbol_sintactico = parser.analisis_sintactico()
         if self.arbol_sintactico != None:
             parser.tree_to_json(self.arbol_sintactico)
+        errores = parser.get_errores()
+        self.errores_tab.configure(state="normal")
+        for error in errores:
+            self.errores_tab.insert("end", error)
+        self.errores_tab.configure(state="disabled")
     
     def mostrar_analisis_sintactico(self, *args):
         self.errores_tab.configure(state="normal")
-        
         # Analizar la existencia de los archivos necesarios: 
         if os.path.exists(os.path.join('analisis_sintactico','tree.json')):
             if os.path.exists('Tree.class'):
