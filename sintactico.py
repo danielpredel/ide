@@ -32,7 +32,8 @@ class AnalizadorSintactico:
         if self.token == expected_token:
             self.token = self.get_token()
         else:
-            self.error()
+            # self.error()
+            self.error_sintaxis(f'token -> {self.lexema}, se espera -> {expected_token}')
     
     def get_token(self):
         self.index += 1
