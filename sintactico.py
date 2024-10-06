@@ -93,13 +93,14 @@ class AnalizadorSintactico:
         main_node.name = 'main'
         return main_node
 
-    def nuevo_nodo_exp(self, index):
+    def nuevo_nodo_exp(self, index, exp_type = None):
         exp_kind = ['OPERADOR','CONSTANTE','IDENTIFICADOR']
         kind = exp_kind[index]
         exp_node = Node()
         exp_node.node_kind = ['EXPRESION',kind]
         exp_node.lineno = self.lineno
         exp_node.name = self.lexema
+        exp_node.exp_type = exp_type
         return exp_node
     
     def nuevo_nodo_sent(self, index):
@@ -115,9 +116,10 @@ class AnalizadorSintactico:
         exp_kind = ['INTEGER','DOUBLE']
         kind = exp_kind[index]
         exp_node = Node()
-        exp_node.node_kind = ['DECLARACION_VARIABLE',kind]
+        exp_node.node_kind = ['DECLARACION',kind]
         exp_node.lineno = self.lineno
         exp_node.name = self.lexema
+        exp_node.exp_type = kind.lower()
         return exp_node
     
     def nuevo_nodo_lista_sentencias(self,index):
@@ -153,6 +155,7 @@ class AnalizadorSintactico:
         one_child.lineno = self.lineno
         one_child.name = '1'
         one_child.val = 1
+        one_child.exp_type = 'integer'
         exp_node.child[1] = one_child
         
         return exp_node
@@ -197,18 +200,19 @@ class AnalizadorSintactico:
             t = self.nuevo_nodo_declaracion_variable(1)
             self.match(self.token)
         
-        t.child[0], t.siblings = self.identificador()
+        exp_type = t.exp_type
+        
+        t.child[0], t.siblings = self.identificador(exp_type)
         self.match('PUNTO_Y_COMA')
         return t
     
-    def identificador(self):
-        t = self.nuevo_nodo_exp(2)
-        # print(f'Token: {self.token}, Lexema: {self.lexema}, t.name {t.name}')
+    def identificador(self, exp_type):
+        t = self.nuevo_nodo_exp(2, exp_type)
         siblings = []
         self.match('IDENTIFICADOR')
         while self.token == 'COMA':
             self.match('COMA')
-            siblings.append(self.nuevo_nodo_exp(2))
+            siblings.append(self.nuevo_nodo_exp(2,exp_type))
             self.match('IDENTIFICADOR')
         return t, siblings
     
@@ -407,22 +411,22 @@ class AnalizadorSintactico:
             t = self.expresion()
             self.match('PARENTESIS_D')
         elif self.token == 'ENTERO':
-            t = self.nuevo_nodo_exp(1)
+            t = self.nuevo_nodo_exp(1,'integer')
             if t != None and self.token == 'ENTERO':
                 t.val = int(self.lexema)
             self.match('ENTERO')
         elif self.token == 'REAL':
-            t = self.nuevo_nodo_exp(1)
+            t = self.nuevo_nodo_exp(1,'double')
             if t != None and self.token == 'REAL':
                 t.val = float(self.lexema)
             self.match('REAL')
         elif self.token == 'ENTERO_NEG':
-            t = self.nuevo_nodo_exp(1)
+            t = self.nuevo_nodo_exp(1,'integer')
             if t != None and self.token == 'ENTERO_NEG':
                 t.val = int(self.lexema)
             self.match('ENTERO_NEG')
         elif self.token == 'REAL_NEG':
-            t = self.nuevo_nodo_exp(1)
+            t = self.nuevo_nodo_exp(1,'double')
             if t != None and self.token == 'REAL_NEG':
                 t.val = float(self.lexema)
             self.match('REAL_NEG')
