@@ -34,6 +34,13 @@ class Node:
         res = {
             "name": self.name
         }
+        
+        if self.node_kind[0] == 'EXPRESION':
+            res["attributes"] = [{"type": str(self.exp_type), "value": str(self.val)}]
+        
+        if self.node_kind[0] == 'DECLARACION':
+            res["attributes"] = [{"type": str(self.exp_type)}]
+            
         children = []
         siblings = []
         
