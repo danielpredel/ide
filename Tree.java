@@ -29,7 +29,12 @@ public class Tree {
 
             // Construir el árbol desde el objeto JSON
             // buildTreeFromJsonArray(jsonObject.getJSONObject("main"), root);
-            buildTreeFromJsonArray(jsonObject.getJSONArray("main"), root);
+
+            boolean anotaciones = false;
+            if (args.length > 0) {
+                anotaciones = Boolean.parseBoolean(args[0]);
+            }
+            buildTreeFromJsonArray(jsonObject.getJSONArray("main"), root, anotaciones);
 
             // Crear el modelo de árbol
             DefaultTreeModel treeModel = new DefaultTreeModel(root);
@@ -41,7 +46,14 @@ public class Tree {
             expandAllNodes(tree, 0, tree.getRowCount());
 
             // Crear y configurar la ventana
-            JFrame frame = new JFrame("Arbol Sintactico");
+            
+            JFrame frame;
+            if (anotaciones){
+                frame = new JFrame("Arbol Sintactico con Anotaciones");
+            }
+            else {
+                frame = new JFrame("Arbol Sintactico");
+            }
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.add(new JScrollPane(tree));
             frame.setSize(800, 600);
@@ -62,17 +74,35 @@ public class Tree {
     }
 
     // Construir el árbol desde el array JSON
-    private static void buildTreeFromJsonArray(JSONArray jsonArray, DefaultMutableTreeNode parent) {
+    private static void buildTreeFromJsonArray(JSONArray jsonArray, DefaultMutableTreeNode parent, boolean anotaciones) {
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonChild = jsonArray.getJSONObject(i);
-            DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(jsonChild.getString("name"));
-            parent.add(childNode);
-            if (jsonChild.has("children")) {
-                buildTreeFromJsonArray(jsonChild.getJSONArray("children"), childNode);
+            if (jsonChild.has("name")) {
+                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(jsonChild.getString("name"));
+                parent.add(childNode);
+                if (jsonChild.has("children")) {
+                    buildTreeFromJsonArray(jsonChild.getJSONArray("children"), childNode, anotaciones);
+                }
+                if (jsonChild.has("siblings")) {
+                    buildTreeFromJsonArray(jsonChild.getJSONArray("siblings"), childNode, anotaciones);
+                }
+                if (jsonChild.has("attributes")) {
+                    buildTreeFromJsonArray(jsonChild.getJSONArray("attributes"), childNode, anotaciones);
+                }
             }
-            if (jsonChild.has("siblings")) {
-                buildTreeFromJsonArray(jsonChild.getJSONArray("siblings"), childNode);
+
+            if(anotaciones){
+                if (jsonChild.has("type")) {    
+                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(jsonChild.getString("type"));
+                    parent.add(childNode);
+                }
+                if (jsonChild.has("value")) {
+                    DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(jsonChild.getString("value"));
+                    parent.add(childNode);
+                }
             }
+            // Para Arbol sintactico con anotaciones
+            
         }
     }
 
