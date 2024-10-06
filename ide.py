@@ -118,14 +118,19 @@ class App(ctk.CTk):
         self.analisis_tabview.add("Lexico")
         self.analisis_tabview.add("Sintactico")
         self.analisis_tabview.add("Semantico")
-        self.analisis_tabview.add("C. Intermedio")
         self.analisis_tabview.add("T. Simbolos")
+        self.analisis_tabview.add("C. Intermedio")
         
         # Textbox de salida para Analisis Lexico
         self.analisis_tabview.tab("Lexico").grid_columnconfigure(0, weight=1)
-        self.analisis_tabview.tab("Lexico").grid_rowconfigure(0, weight=1)
+        self.analisis_tabview.tab("Lexico").grid_rowconfigure(1, weight=1)
+        
+        # Botón para abrir otra ventana
+        self.boton_abrir = ctk.CTkButton(self.analisis_tabview.tab("Lexico"), text="Abrir en otra ventana")
+        self.boton_abrir.grid(row=0, column=0, padx=0, pady=5, sticky="ew")
+        
         self.lexico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Lexico"), wrap='none')
-        self.lexico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        self.lexico_tab.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         self.lexico_tab.configure(state="disabled")
         
         for i in range(0, len(tokens)):
@@ -136,16 +141,12 @@ class App(ctk.CTk):
         self.analisis_tabview.tab("Sintactico").grid_rowconfigure(0, weight=1)
         self.tree_button = ctk.CTkButton(self.analisis_tabview.tab("Sintactico"), text='Mostrar Arbol Sintactico', width=40, command= lambda: self.mostrar_analisis_sintactico())
         self.tree_button.grid(row=0, column=0, padx=5, pady=10)
-        # self.sintactico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Sintactico"), wrap='word')
-        # self.sintactico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        # self.sintactico_tab.configure(state="disabled")
         
         # Textbox de salida para Analisis Semantico
         self.analisis_tabview.tab("Semantico").grid_columnconfigure(0, weight=1)
         self.analisis_tabview.tab("Semantico").grid_rowconfigure(0, weight=1)
-        self.semantico_tab = ctk.CTkTextbox(self.analisis_tabview.tab("Semantico"), wrap='word')
-        self.semantico_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.semantico_tab.configure(state="disabled")
+        self.anotations_tree_button = ctk.CTkButton(self.analisis_tabview.tab("Semantico"), text='Mostrar Arbol Sintactico con Anotaciones', width=40)
+        self.anotations_tree_button.grid(row=0, column=0, padx=5, pady=10)
         
         # Textbox de salida para Codigo Intermedio
         self.analisis_tabview.tab("C. Intermedio").grid_columnconfigure(0, weight=1)
@@ -156,9 +157,14 @@ class App(ctk.CTk):
         
         # Textbox de salida para Tabla de Simbolos
         self.analisis_tabview.tab("T. Simbolos").grid_columnconfigure(0, weight=1)
-        self.analisis_tabview.tab("T. Simbolos").grid_rowconfigure(0, weight=1)
-        self.tabla_simb_tab = ctk.CTkTextbox(self.analisis_tabview.tab("T. Simbolos"), wrap='word')
-        self.tabla_simb_tab.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        self.analisis_tabview.tab("T. Simbolos").grid_rowconfigure(1, weight=1)
+        
+        # Botón para abrir otra ventana
+        self.boton_abrir_simbolos = ctk.CTkButton(self.analisis_tabview.tab("T. Simbolos"), text="Abrir en otra ventana")
+        self.boton_abrir_simbolos.grid(row=0, column=0, padx=0, pady=5, sticky="ew")
+        
+        self.tabla_simb_tab = ctk.CTkTextbox(self.analisis_tabview.tab("T. Simbolos"), wrap='none')
+        self.tabla_simb_tab.grid(row=1, column=0, padx=0, pady=0, sticky="nsew")
         self.tabla_simb_tab.configure(state="disabled")
         
         # Tabview Errores y ejecucion
@@ -501,6 +507,7 @@ class App(ctk.CTk):
     def java_window(self, *args):
         if os.name == 'posix':
             subprocess.run(["java", "-cp",".:json-20240303.jar","Tree"])
+            # subprocess.run(["java", "-cp",".:json-20240303.jar","Tree", "true"])
         elif os.name == 'nt':
             subprocess.run(["java", "-cp",".;json-20240303.jar","Tree"])
     
