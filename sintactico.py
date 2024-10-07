@@ -131,12 +131,47 @@ class AnalizadorSintactico:
         exp_node.name = kind.lower()
         return exp_node
 
-    def nuevo_nodo_inc_dec(self,index):
-        exp_kind = ['INCREMENTO','DECREMENTO']
+    # def nuevo_nodo_inc_dec(self,index):
+    #     exp_kind = ['INCREMENTO','DECREMENTO']
+    #     kind = exp_kind[index]
+    #     exp_node = Node()
+    #     exp_node.node_kind = ['EXPRESION',kind]
+    #     exp_node.lineno = self.lineno
+    #     if index == 0:
+    #         exp_node.name = '+'
+    #         exp_node.op = '+'
+    #     else:
+    #         exp_node.name = '-'
+    #         exp_node.op = '-'
+        
+    #     id_child = Node()
+    #     id_child.node_kind = ['EXPRESION','IDENTIFICADOR']
+    #     id_child.lineno = self.lineno
+    #     id_child.name = self.lexema
+    #     exp_node.child[0] = id_child
+        
+    #     one_child = Node()
+    #     one_child.node_kind = ['EXPRESION','CONSTANTE']
+    #     one_child.lineno = self.lineno
+    #     one_child.name = '1'
+    #     one_child.val = 1
+    #     one_child.exp_type = 'integer'
+    #     exp_node.child[1] = one_child
+        
+    #     return exp_node
+
+    def nuevo_nodo_inc_dec(self, index):
+        # Crear nodo de identificador
+        identificador = Node()
+        identificador.node_kind = ['EXPRESION','IDENTIFICADOR']
+        identificador.name = self.lexema
+        identificador.lineno = self.lineno
+        
+        # Crear nodo exp de + o -
+        exp_kind = ['SUMA','RESTA']
         kind = exp_kind[index]
         exp_node = Node()
         exp_node.node_kind = ['EXPRESION',kind]
-        exp_node.lineno = self.lineno
         if index == 0:
             exp_node.name = '+'
             exp_node.op = '+'
@@ -144,22 +179,31 @@ class AnalizadorSintactico:
             exp_node.name = '-'
             exp_node.op = '-'
         
+        # Crear nodo exp/id
         id_child = Node()
         id_child.node_kind = ['EXPRESION','IDENTIFICADOR']
-        id_child.lineno = self.lineno
         id_child.name = self.lexema
-        exp_node.child[0] = id_child
         
+        # Crear nodo exp/const de 1
         one_child = Node()
         one_child.node_kind = ['EXPRESION','CONSTANTE']
-        one_child.lineno = self.lineno
         one_child.name = '1'
         one_child.val = 1
         one_child.exp_type = 'integer'
+        
+        # Agregar hijos a nodo exp
+        exp_node.child[0] = id_child
         exp_node.child[1] = one_child
         
-        return exp_node
-
+        # Crear nodo de asignacion
+        asignacion = Node()
+        asignacion.node_kind = ['SENTENCIA', 'ASIGNACION']
+        asignacion.name = '='        
+        asignacion.child[0] = identificador
+        asignacion.child[1] = exp_node
+        
+        return asignacion
+        
     def programa(self):
         self.match('MAIN')
         self.match('LLAVE_I')
