@@ -14,8 +14,13 @@ import java.io.File;
 public class Tree {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            boolean anotaciones = false;
+            if (args.length > 0) {
+                anotaciones = Boolean.parseBoolean(args[0]);
+            }
 
-            String filepath = "analisis_sintactico" + File.separator + "tree.json";
+            String fase = (anotaciones) ? "analisis_semantico" : "analisis_sintactico";
+            String filepath = fase + File.separator + "tree.json";
 
             // Leer el archivo JSON
             JSONObject jsonObject = readJsonFile(filepath);
@@ -30,10 +35,7 @@ public class Tree {
             // Construir el árbol desde el objeto JSON
             // buildTreeFromJsonArray(jsonObject.getJSONObject("main"), root);
 
-            boolean anotaciones = false;
-            if (args.length > 0) {
-                anotaciones = Boolean.parseBoolean(args[0]);
-            }
+            
             buildTreeFromJsonArray(jsonObject.getJSONArray("main"), root, anotaciones);
 
             // Crear el modelo de árbol
