@@ -11,7 +11,7 @@ class AnalizadorSemantico:
             self.preorden(self.arbol_sintactico)
         
         print(self.errores)
-        # print(self.tabla_simbolos)
+        print(self.tabla_simbolos)
         self.arbol_sintactico.preorden()
     
     def preorden(self, nodo: Node, parent_node_kind = [None,None]):
@@ -82,9 +82,11 @@ class AnalizadorSemantico:
         elif nodo.node_kind[0] == 'EXPRESION':
             if nodo.node_kind[1] == 'CONSTANTE':
                 return nodo.val, nodo.exp_type
+            
             elif nodo.node_kind[1] == 'IDENTIFICADOR':
                 if nodo.name in self.tabla_simbolos:
-                    self.tabla_simbolos[nodo.name]["lines"].append(nodo.lineno)
+                    if nodo.lineno is not None:
+                        self.tabla_simbolos[nodo.name]["lines"].append(nodo.lineno)
                     valor = self.tabla_simbolos[nodo.name]['value']
                     nodo.val = valor
                     nodo.exp_type = self.tabla_simbolos[nodo.name]["type"]
@@ -95,6 +97,7 @@ class AnalizadorSemantico:
                     error = f'Error en la linea {nodo.lineno}: la variable "{nodo.name}" no se ha declarado'
                     self.errores.append(error)
                 return nodo.val, nodo.exp_type
+            
             elif nodo.node_kind[1] == 'OPERADOR':
                 valor_op_0, tipo_op_0 = self.preorden(nodo.child[0])
                 valor_op_1, tipo_op_1 = self.preorden(nodo.child[1])
@@ -107,62 +110,74 @@ class AnalizadorSemantico:
                 if nodo.op in ['AND','OR']:
                     nodo.exp_type = 'boolean'
                     if tipo_op_0 == 'boolean' and tipo_op_1 == 'boolean':
-                        # Efectuar operacion
-                        if nodo.op == 'AND':
-                            nodo.val = valor_op_0 and valor_op_1
+                        if valor_op_0 is not None and valor_op_1 is not None:
+                            # Efectuar operacion
+                            if nodo.op == 'AND':
+                                nodo.val = valor_op_0 and valor_op_1
+                            else:
+                                nodo.val = valor_op_0 or valor_op_1
                         else:
-                            nodo.val = valor_op_0 or valor_op_1
+                            error = f'Error en la linea {nodo.lineno}: operacion logica "{valor_op_0} {nodo.name} {valor_op_1}" no permitida'
+                            self.errores.append(error)
+                            nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion logica "{tipo_op_0}" {nodo.name} "{tipo_op_1}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion logica entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
-                    
-                    # return nodo.val, nodo.exp_type
                     
                 elif nodo.op in ['MENOR','MENOR_IGUAL','MAYOR','MAYOR_IGUAL','DIFERENTE','IGUAL']:
                     nodo.exp_type = 'boolean'
                     if tipo_op_0 in ['integer','double'] and tipo_op_1 in ['integer','double']:
-                        # Efectuar operacion
-                        if nodo.op == 'MENOR':
-                            nodo.val = valor_op_0 < valor_op_1
-                        elif nodo.op == 'MENOR_IGUAL':
-                            nodo.val = valor_op_0 <= valor_op_1
-                        elif nodo.op == 'MAYOR':
-                            nodo.val = valor_op_0 > valor_op_1
-                        elif nodo.op == 'MAYOR_IGUAL':
-                            nodo.val = valor_op_0 >= valor_op_1
-                        elif nodo.op == 'DIFERENTE':
-                            nodo.val = valor_op_0 != valor_op_1
+                        if valor_op_0 is not None and valor_op_1 is not None:
+                            # Efectuar operacion
+                            if nodo.op == 'MENOR':
+                                nodo.val = valor_op_0 < valor_op_1
+                            elif nodo.op == 'MENOR_IGUAL':
+                                nodo.val = valor_op_0 <= valor_op_1
+                            elif nodo.op == 'MAYOR':
+                                nodo.val = valor_op_0 > valor_op_1
+                            elif nodo.op == 'MAYOR_IGUAL':
+                                nodo.val = valor_op_0 >= valor_op_1
+                            elif nodo.op == 'DIFERENTE':
+                                nodo.val = valor_op_0 != valor_op_1
+                            else:
+                                nodo.val = valor_op_0 == valor_op_1
                         else:
-                            nodo.val = valor_op_0 == valor_op_1
+                            error = f'Error en la linea {nodo.lineno}: operacion relacional "{valor_op_0} {nodo.name} {valor_op_1}" no permitida'
+                            self.errores.append(error)
+                            nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion relacional "{tipo_op_0}" {nodo.name} "{tipo_op_1}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion relacional entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
                     # return nodo.val, nodo.exp_type
                 
                 elif nodo.op in ['SUMA','RESTA','MULTIPLICACION','DIVISION','MODULO','POTENCIA']:
                     if tipo_op_0 in ['integer','double'] and tipo_op_1 in ['integer','double']:
-                        if nodo.op == 'SUMA':
-                            nodo.val = valor_op_0 + valor_op_1
-                        elif nodo.op == 'RESTA':
-                            nodo.val = valor_op_0 - valor_op_1
-                        elif nodo.op == 'MULTIPLICACION':
-                            nodo.val = valor_op_0 * valor_op_1
-                        elif nodo.op == 'DIVISION':
-                            nodo.val = valor_op_0 / valor_op_1
-                        elif nodo.op == 'MODULO':
-                            nodo.val = valor_op_0 % valor_op_1
+                        if valor_op_0 is not None and valor_op_1 is not None:
+                            if nodo.op == 'SUMA':
+                                nodo.val = valor_op_0 + valor_op_1
+                            elif nodo.op == 'RESTA':
+                                nodo.val = valor_op_0 - valor_op_1
+                            elif nodo.op == 'MULTIPLICACION':
+                                nodo.val = valor_op_0 * valor_op_1
+                            elif nodo.op == 'DIVISION':
+                                nodo.val = valor_op_0 / valor_op_1
+                            elif nodo.op == 'MODULO':
+                                nodo.val = valor_op_0 % valor_op_1
+                            else:
+                                nodo.val = valor_op_0 ** valor_op_1
+                            
+                            if type(nodo.val) == int:
+                                nodo.exp_type = 'integer'
+                            elif type(nodo.val) == float:
+                                nodo.exp_type = 'double'
                         else:
-                            nodo.val = valor_op_0 ** valor_op_1
-                        
-                        if type(nodo.val) == int:
-                            nodo.exp_type = 'integer'
-                        elif type(nodo.val) == float:
-                            nodo.exp_type = 'double'
-                        
+                            error = f'Error en la linea {nodo.lineno}: operacion aritmetica "{valor_op_0} {nodo.name} {valor_op_1}" no permitida'
+                            self.errores.append(error)
+                            nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion artimetica "{tipo_op_0}" {nodo.name} "{tipo_op_1}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion artimetica entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
                         nodo.exp_type = 'integer'
