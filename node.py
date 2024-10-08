@@ -23,12 +23,15 @@ class Node:
         self.exp_type = None
     
     def preorden(self):
-        print(self.name)
+        print(f'N: {self.name}, T: {self.exp_type}, V:{self.val}')
         for node in self.child:
             if node == None:
                 break
             else:
                 node.preorden()
+        
+        for node in self.siblings:
+            node.preorden()
     
     def to_dict(self):
         res = {
