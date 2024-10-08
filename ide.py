@@ -34,6 +34,12 @@ class App(ctk.CTk):
     
     arbol_sintactico = None
     
+    # Analisis semantico
+    arbol_sintactico_anotado = None
+    tabla_simbolos = None
+    errores_semanticos = None
+    
+    
     def __init__(self):
         super().__init__()
 
@@ -146,7 +152,7 @@ class App(ctk.CTk):
         # Textbox de salida para Analisis Semantico
         self.analisis_tabview.tab("Semantico").grid_columnconfigure(0, weight=1)
         self.analisis_tabview.tab("Semantico").grid_rowconfigure(0, weight=1)
-        self.anotations_tree_button = ctk.CTkButton(self.analisis_tabview.tab("Semantico"), text='Mostrar Arbol Sintactico con Anotaciones', width=40)
+        self.anotations_tree_button = ctk.CTkButton(self.analisis_tabview.tab("Semantico"), text='Mostrar Arbol Sintactico con Anotaciones', width=40, command= lambda: self.mostrar_analisis_semantico())
         self.anotations_tree_button.grid(row=0, column=0, padx=5, pady=10)
         
         # Textbox de salida para Codigo Intermedio
@@ -418,8 +424,9 @@ class App(ctk.CTk):
 
     def build_file(self, *args):
         self.analizar_lexico(self)
-        self.analizar_sintactico(self)
-        self.analizar_semantica(self)
+        n_errores = self.analizar_sintactico(self) + len(self.errores)
+        if n_errores == 0:
+            self.analizar_semantica(self)
         
     def analizar_lexico(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
@@ -485,6 +492,7 @@ class App(ctk.CTk):
         for error in errores:
             self.errores_tab.insert("end", error)
         self.errores_tab.configure(state="disabled")
+        return len(errores)
     
     def mostrar_analisis_sintactico(self, *args):
         self.errores_tab.configure(state="normal")
@@ -493,7 +501,7 @@ class App(ctk.CTk):
             if os.path.exists('Tree.class'):
                 # Compilar Tree.java: javac -cp json-20240303.jar Tree.java
                 if os.path.exists('json-20240303.jar'):
-                    subproceso_java = threading.Thread(target=self.java_window)
+                    subproceso_java = threading.Thread(target=self.arbol_sintactico_window)
                     # Iniciar el subproceso
                     subproceso_java.start()
                     
@@ -506,17 +514,49 @@ class App(ctk.CTk):
         
         self.errores_tab.configure(state="disabled")
     
-    def java_window(self, *args):
+    def arbol_sintactico_window(self, *args):
         if os.name == 'posix':
             subprocess.run(["java", "-cp",".:json-20240303.jar","Tree"])
-            # subprocess.run(["java", "-cp",".:json-20240303.jar","Tree", "true"])
         elif os.name == 'nt':
             subprocess.run(["java", "-cp",".;json-20240303.jar","Tree"])
     
     def analizar_semantica(self, *args):
         analizador_semantico = AnalizadorSemantico(self.arbol_sintactico)
-        analizador_semantico.analisis_semantico()
+        self.arbol_sintactico_anotado, self.tabla_simbolos, errores = analizador_semantico.analisis_semantico()
+        if self.arbol_sintactico_anotado is not None:
+            analizador_semantico.tree_to_json(self.arbol_sintactico_anotado)
+        
+        self.errores_tab.configure(state="normal")
+        for error in errores:
+            self.errores_tab.insert("end", error)
+        self.errores_tab.configure(state="disabled")
         # return 0
+        
+    def mostrar_analisis_semantico(self, *args):
+        self.errores_tab.configure(state="normal")
+        # Analizar la existencia de los archivos necesarios: 
+        if os.path.exists(os.path.join('analisis_semantico','tree.json')):
+            if os.path.exists('Tree.class'):
+                # Compilar Tree.java: javac -cp json-20240303.jar Tree.java
+                if os.path.exists('json-20240303.jar'):
+                    subproceso_java = threading.Thread(target=self.arbol_sintactico_anotado_window)
+                    # Iniciar el subproceso
+                    subproceso_java.start()
+                    
+                else:
+                    self.errores_tab.insert("end", f"No existe el archivo {'json-20240303.jar'}\n")
+            else:
+                self.errores_tab.insert("end", f"No existe el archivo {'Tree.class'}\n")
+        else:
+            self.errores_tab.insert("end", f"No existe el archivo {os.path.join('analisis_semantico','tree.json')}\n")
+        
+        self.errores_tab.configure(state="disabled")
+    
+    def arbol_sintactico_anotado_window(self, *args):
+        if os.name == 'posix':
+            subprocess.run(["java", "-cp",".:json-20240303.jar","Tree", "true"])
+        elif os.name == 'nt':
+            subprocess.run(["java", "-cp",".;json-20240303.jar","Tree", "true"])
     
 if __name__ == "__main__":
     app = App()
