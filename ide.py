@@ -526,9 +526,17 @@ class App(ctk.CTk):
         if self.arbol_sintactico_anotado is not None:
             analizador_semantico.tree_to_json(self.arbol_sintactico_anotado)
         
+        self.tabla_simb_tab.configure(state="normal")
+        self.tabla_simb_tab.delete("0.0", "end")
+        self.tabla_simb_tab.insert("end", "Variable\tTipo\tValor\tLOC\tLineas\n")
+        for key, data in self.tabla_simbolos.items():
+            self.tabla_simb_tab.insert("end", f"{key}\t{data['type']}\t{data['value']}\t{data['loc']}\t{data['lines']}\n")
+        self.tabla_simb_tab.configure(state="disabled")
+        
         self.errores_tab.configure(state="normal")
         for error in errores:
             self.errores_tab.insert("end", error)
+            self.errores_tab.insert("end", '\n')
         self.errores_tab.configure(state="disabled")
         # return 0
         
