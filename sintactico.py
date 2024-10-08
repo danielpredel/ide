@@ -168,16 +168,16 @@ class AnalizadorSintactico:
         identificador.lineno = self.lineno
         
         # Crear nodo exp de + o -
-        exp_kind = ['SUMA','RESTA']
-        kind = exp_kind[index]
+        # exp_kind = ['SUMA','RESTA']
+        # kind = exp_kind[index]
         exp_node = Node()
-        exp_node.node_kind = ['EXPRESION',kind]
+        exp_node.node_kind = ['EXPRESION','OPERADOR']
         if index == 0:
             exp_node.name = '+'
-            exp_node.op = '+'
+            exp_node.op = 'SUMA'
         else:
             exp_node.name = '-'
-            exp_node.op = '-'
+            exp_node.op = 'RESTA'
         
         # Crear nodo exp/id
         id_child = Node()
