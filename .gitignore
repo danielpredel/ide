@@ -6,6 +6,7 @@ analisis_lexico/comentarios.txt
 analisis_lexico/errores.txt
 analisis_lexico/
 analisis_sintactico/
+analisis_semantico/
 __pycache__/
 ide.spec
 codigo.txt
