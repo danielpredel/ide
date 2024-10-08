@@ -1,3 +1,5 @@
+import json
+import os
 from node import Node
 
 class AnalizadorSemantico:
@@ -10,9 +12,11 @@ class AnalizadorSemantico:
         if self.arbol_sintactico is not None:
             self.preorden(self.arbol_sintactico)
         
-        print(self.errores)
-        print(self.tabla_simbolos)
-        self.arbol_sintactico.preorden()
+        return self.arbol_sintactico, self.tabla_simbolos, self.errores
+        
+        # print(self.errores)
+        # print(self.tabla_simbolos)
+        # self.arbol_sintactico_anotado.preorden()
     
     def preorden(self, nodo: Node, parent_node_kind = [None,None]):
         # Este primer condicional puede ser ajustado a la logica de todos los demas condicionales
@@ -79,7 +83,6 @@ class AnalizadorSemantico:
                 if nodo.child[2] is not None:
                     self.preorden(nodo.child[2])
                 
-                # print()
             elif nodo.node_kind[1] == 'REPETICION':
                 # Ejecutar preorden nodo then (si existe)
                 if nodo.child[0] is not None:
@@ -216,3 +219,34 @@ class AnalizadorSemantico:
             
             for sibling in nodo.siblings:
                 self.preorden(sibling, nodo.node_kind)
+    
+    def tree_to_json(self,root):
+        # Agregar root y array
+        diccionario = {
+            'main': [root.to_dict()]
+        }
+        # diccionario = root.to_dict()
+        
+        json_tree = json.dumps(diccionario, indent=2)
+        self.escribir_json(json_tree)
+
+    def escribir_json(self,json_tree):
+        parent_directory = os.path.dirname(__file__)
+        dirname = 'analisis_semantico'
+        abs_dir = os.path.join(parent_directory,dirname)
+        filename = 'tree.json'
+
+        if os.path.isdir(abs_dir):
+            abs_path = os.path.join(abs_dir,filename)
+            with open(abs_path, 'w') as archivo:
+                archivo.write(json_tree)
+        else:
+            try:
+                os.mkdir(abs_dir)
+                abs_path = os.path.join(abs_dir,filename)
+                with open(abs_path, 'w') as archivo:
+                    archivo.write(json_tree)
+            except:
+                print(f'Error al trabajar en el directorio: {abs_dir}')
+                pass
+    
