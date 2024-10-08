@@ -39,18 +39,21 @@ class Node:
         }
         
         if self.node_kind[0] == 'EXPRESION':
-            res["attributes"] = [{"type": str(self.exp_type), "value": str(self.val)}]
+            res["attributes"] = [{"type": f'Tipo: {str(self.exp_type)}', "value": f'Valor: {str(self.val)}'}]
         
-        if self.node_kind[0] == 'DECLARACION':
-            res["attributes"] = [{"type": str(self.exp_type)}]
+        # if self.node_kind[0] == 'DECLARACION':
+        #     res["attributes"] = [{"type": str(self.exp_type)}]
             
         children = []
         siblings = []
         
+        # for node in self.child:
+        #     if node == None:
+        #         break
+        #     else:
+        #         children.append(node.to_dict())
         for node in self.child:
-            if node == None:
-                break
-            else:
+            if node != None:
                 children.append(node.to_dict())
         
         for node in self.siblings:
