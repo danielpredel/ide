@@ -64,12 +64,33 @@ class AnalizadorSemantico:
                 else:
                     error = f'Error en la linea {identificador.lineno}: la variable "{identificador.name}" no se ha declarado'
                     self.errores.append(error)
-            # elif nodo.node_kind[1] == 'SELECCION' or nodo.node_kind[1] == 'ITERACION':
-            #     # Validar que child[0] sea exp boolean
-            #     print()
-            # elif nodo.node_kind[1] == 'REPETICION':
-            #     # Validar que child[1] sea exp boolean
-            #     print()
+            elif nodo.node_kind[1] == 'SELECCION' or nodo.node_kind[1] == 'ITERACION':
+                # Validar que child[0] sea exp boolean
+                exp_valor, exp_tipo = self.preorden(nodo.child[0])
+                if exp_tipo != 'boolean':
+                    error = f'Error en la linea {nodo.lineno}: sentencia {nodo.name} espera una expresion "boolean", recibió una expresion "{exp_tipo}'
+                    self.errores.append(error)
+                
+                # Ejecutar preorden para nodo then (si existe)
+                if nodo.child[1] is not None:
+                    self.preorden(nodo.child[1])
+                
+                # Ejecutar preorden para nodo else (si existe)
+                if nodo.child[2] is not None:
+                    self.preorden(nodo.child[2])
+                
+                # print()
+            elif nodo.node_kind[1] == 'REPETICION':
+                # Ejecutar preorden nodo then (si existe)
+                if nodo.child[0] is not None:
+                    self.preorden(nodo.child[0])
+                
+                # Validar que child[1] sea exp boolean
+                exp_valor, exp_tipo = self.preorden(nodo.child[1])
+                if exp_tipo != 'boolean':
+                    error = f'Error en la linea {nodo.lineno}: sentencia {nodo.name} espera una expresion "boolean", recibió una expresion "{exp_tipo}'
+                    self.errores.append(error)
+                
             else:
                 for child in nodo.child:
                     if child == None:
@@ -121,7 +142,7 @@ class AnalizadorSemantico:
                             self.errores.append(error)
                             nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion logica entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion logica entre tipos de datos "{tipo_op_0}" y "{tipo_op_1}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
                     
@@ -147,7 +168,7 @@ class AnalizadorSemantico:
                             self.errores.append(error)
                             nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion relacional entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion relacional entre tipos de datos "{tipo_op_0}" y "{tipo_op_1}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
                     # return nodo.val, nodo.exp_type
@@ -177,7 +198,7 @@ class AnalizadorSemantico:
                             self.errores.append(error)
                             nodo.val = None
                     else:
-                        error = f'Error en la linea {nodo.lineno}: operacion artimetica entre tipos de datos "{tipo_op_0}" y "{tipo_op_0}" no permitida'
+                        error = f'Error en la linea {nodo.lineno}: operacion artimetica entre tipos de datos "{tipo_op_0}" y "{tipo_op_1}" no permitida'
                         self.errores.append(error)
                         nodo.val = None
                         nodo.exp_type = 'integer'
