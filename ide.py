@@ -7,6 +7,7 @@ from tokens import tokens
 from colores_token import colores
 import lexico
 from sintactico import AnalizadorSintactico
+from semantico import AnalizadorSemantico
 import subprocess
 import threading
 
@@ -418,6 +419,7 @@ class App(ctk.CTk):
     def build_file(self, *args):
         self.analizar_lexico(self)
         self.analizar_sintactico(self)
+        self.analizar_semantica(self)
         
     def analizar_lexico(self, *args):
         codigo = self.code_textbox.get("1.0","end-1c")
@@ -510,6 +512,11 @@ class App(ctk.CTk):
             # subprocess.run(["java", "-cp",".:json-20240303.jar","Tree", "true"])
         elif os.name == 'nt':
             subprocess.run(["java", "-cp",".;json-20240303.jar","Tree"])
+    
+    def analizar_semantica(self, *args):
+        analizador_semantico = AnalizadorSemantico(self.arbol_sintactico)
+        analizador_semantico.analisis_semantico()
+        # return 0
     
 if __name__ == "__main__":
     app = App()
