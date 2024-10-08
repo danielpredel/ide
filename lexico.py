@@ -78,7 +78,13 @@ def analizador_lexico(codigo):
             elif row == 7:
                 analisis.append([lexema,tokens[4],sub_tokens[23],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 8:
-                analisis.append([lexema,tokens[4],sub_tokens[24],row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
+                if lexema[0] == '=':
+                    sub_token = sub_tokens[24]
+                elif lexema[0] == '<':
+                    sub_token = sub_tokens[20]
+                elif lexema[0] == '>':
+                    sub_token = sub_tokens[22]
+                analisis.append([lexema,tokens[4],sub_token,row_archivo,col_archivo-len(lexema)+1,col_archivo+1])
             elif row == 10:
                 comentarios.append(['L',row_archivo,row_archivo,col_comentario,col_archivo])
                 row_archivo += 1
