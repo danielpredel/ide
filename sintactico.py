@@ -172,6 +172,7 @@ class AnalizadorSintactico:
         # kind = exp_kind[index]
         exp_node = Node()
         exp_node.node_kind = ['EXPRESION','OPERADOR']
+        exp_node.lineno = identificador.lineno
         if index == 0:
             exp_node.name = '+'
             exp_node.op = 'SUMA'
